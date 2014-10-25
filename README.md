@@ -7,7 +7,9 @@ entirely visible.
 
 Clone or download the repository and open
 [examples/popup.html](examples/popup.html) in a browser or [view the example on
-RawGit](http://rawgit.com/walkermatt/ol3-popup/master/examples/popup.html)
+RawGit](http://rawgit.com/walkermatt/ol3-popup/master/examples/popup.html).
+Click on the map to display a popup, click close to the edge of the map to see
+it pan into view.
 
 ## Credit
 
