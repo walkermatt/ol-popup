@@ -62,7 +62,6 @@ ol.Overlay.Popup.prototype.panIntoView = function(coord) {
             height: this.getElement().clientHeight + 20
         },
         mapSize = this.getMap().getSize(),
-        center = this.getMap().getView().getCenter().slice(0),
         res = this.getMap().getView().getResolution();
 
     var tailHeight = 20,
@@ -71,30 +70,31 @@ ol.Overlay.Popup.prototype.panIntoView = function(coord) {
         popPx = this.getMap().getPixelFromCoordinate(coord);
 
     var fromLeft = (popPx[0] - tailOffsetLeft),
-        fromRight = mapSize[0] - (popPx[0] + tailOffsetRight),
-        x = center[0];
+        fromRight = mapSize[0] - (popPx[0] + tailOffsetRight);
 
     var fromTop = popPx[1] - popSize.height,
-        fromBottom = mapSize[1] - (popPx[1] + tailHeight),
-        y = center[1];
+        fromBottom = mapSize[1] - (popPx[1] + tailHeight);
+
+    var center = this.getMap().getView().getCenter(),
+        px = this.getMap().getPixelFromCoordinate(center);
 
     if (fromRight < 0) {
-        x -= fromRight * res;
+        px[0] -= fromRight;
     } else if (fromLeft < 0) {
-        x += fromLeft * res;
+        px[0] += fromLeft;
     }
 
     if (fromTop < 0) {
-        y -= fromTop * res;
+        px[1] += fromTop;
     } else if (fromBottom < 0) {
-        y += fromBottom * res;
+        px[1] -= fromBottom;
     }
 
     if (this.ani && this.ani_opts) {
         this.ani_opts.source = center;
         this.getMap().beforeRender(this.ani(this.ani_opts));
     }
-    this.getMap().getView().setCenter([x, y]);
+    this.getMap().getView().setCenter(this.getMap().getCoordinateFromPixel(px));
 
     return this.getMap().getView().getCenter();
 
