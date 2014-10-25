@@ -19,3 +19,8 @@ Based on an example by [Tim Schaub](https://github.com/tschaub) posted on the
 ## License
 
 MIT (c) Matt Walker.
+
+## Also see
+
+If you find the popup useful you might also like the
+[ol3-layerswitcher](https://github.com/walkermatt/ol3-layerswitcher).
