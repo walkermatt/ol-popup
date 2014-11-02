@@ -61,19 +61,19 @@ ol.Overlay.Popup.prototype.panIntoView = function(coord) {
             width: this.getElement().clientWidth + 20,
             height: this.getElement().clientHeight + 20
         },
-        mapSize = this.getMap().getSize(),
-        res = this.getMap().getView().getResolution();
+        mapSize = this.getMap().getSize();
 
     var tailHeight = 20,
         tailOffsetLeft = 60,
         tailOffsetRight = popSize.width - tailOffsetLeft,
+        popOffset = this.getOffset(),
         popPx = this.getMap().getPixelFromCoordinate(coord);
 
     var fromLeft = (popPx[0] - tailOffsetLeft),
         fromRight = mapSize[0] - (popPx[0] + tailOffsetRight);
 
-    var fromTop = popPx[1] - popSize.height,
-        fromBottom = mapSize[1] - (popPx[1] + tailHeight);
+    var fromTop = popPx[1] - popSize.height + popOffset[1],
+        fromBottom = mapSize[1] - (popPx[1] + tailHeight) - popOffset[1];
 
     var center = this.getMap().getView().getCenter(),
         px = this.getMap().getPixelFromCoordinate(center);
