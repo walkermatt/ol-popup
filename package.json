@@ -1,0 +1,24 @@
+{
+  "name": "ol3-popup",
+  "version": "0.0.1",
+  "description": "Popup overlay for OpenLayers 3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/walkermatt/ol3-popup.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/walkermatt/ol3-popup/issues"
+  },
+  "scripts": {
+      "doc": "./node_modules/.bin/jsdoc --explain src/ol3-popup.js | util/docs.js util/README.md > README.md"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "jsdoc": "3.3.0-beta1",
+    "jspath": "0.3.0",
+    "lodash": "~2.4.1",
+    "nunjucks": "1.1.0"
+  }
+}

@@ -18,38 +18,41 @@ Based on an example by [Tim Schaub](https://github.com/tschaub) posted on the
 
 ## API
 
-### `new ol.Overlay.Popup(opt_options)`
+{% for class in classes -%}
 
-OpenLayers 3 Popup Overlay.
-See [the examples](./examples) for usage. Styling can be done via CSS.
+### `new {{ class.longname }}({{ class.signature }})`
+
+{{ class.description }}
 
 #### Parameters:
 
 |Name|Type|Description|
 |:---|:---|:----------|
-|`opt_options`|`Object`| Overlay options, extends olx.OverlayOptions adding: **`panMapIfOutOfView`** `Boolean` - Should the map be panned so that the popup is entirely within view. |
+{% for param in class.params %}|`{{ param.name }}`|`{{ param.type.names[0] }}`| {{ param.description }} |{% endfor %}
 
 #### Extends
 
-`ol.Overlay`
+`{{ class.augments }}`
 
 #### Methods
 
-##### `show(coord,html)`
+{% for method in class.methods -%}
+##### `{% if method.scope == 'static' %}(static) {{ class.longname }}.{% endif %}{{ method.name }}({{ method.signature }})`
 
-Show the popup.
+{{ method.description }}
 
+{% if method.params -%}
 ###### Parameters:
 
 |Name|Type|Description|
 |:---|:---|:----------|
-|`coord`|`ol.Coordinate`| Where to anchor the popup. |
-|`html`|`String`| String of HTML to display within the popup. |
+{% for param in method.params -%}
+|`{{ param.name }}`|`{{ param.type.names[0] }}`| {{ param.description }} |
+{% endfor %}
 
-
-##### `hide()`
-
-Hide the popup.
+{% endif %}
+{%- endfor %}
+{%- endfor -%}
 
 ## License
 
@@ -59,4 +62,3 @@ MIT (c) Matt Walker.
 
 If you find the popup useful you might also like the
 [ol3-layerswitcher](https://github.com/walkermatt/ol3-layerswitcher).
-

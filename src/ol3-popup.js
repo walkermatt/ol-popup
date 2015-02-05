@@ -1,3 +1,13 @@
+/**
+ * OpenLayers 3 Popup Overlay.
+ * See [the examples](./examples) for usage. Styling can be done via CSS.
+ * @constructor
+ * @extends {ol.Overlay}
+ * @param {Object} opt_options Overlay options, extends olx.OverlayOptions adding:
+ *                              **`panMapIfOutOfView`** `Boolean` - Should the
+ *                              map be panned so that the popup is entirely
+ *                              within view.
+ */
 ol.Overlay.Popup = function(opt_options) {
 
     var options = opt_options || {};
@@ -45,17 +55,25 @@ ol.Overlay.Popup = function(opt_options) {
 
 ol.inherits(ol.Overlay.Popup, ol.Overlay);
 
+/**
+ * Show the popup.
+ * @param {ol.Coordinate} coord Where to anchor the popup.
+ * @param {String} html String of HTML to display within the popup.
+ */
 ol.Overlay.Popup.prototype.show = function(coord, html) {
     this.setPosition(coord);
     this.content.innerHTML = html;
     this.container.style.display = 'block';
     if (this.panMapIfOutOfView) {
-        this.panIntoView(coord);
+        this.panIntoView_(coord);
     }
     return this;
 };
 
-ol.Overlay.Popup.prototype.panIntoView = function(coord) {
+/**
+ * @private
+ */
+ol.Overlay.Popup.prototype.panIntoView_ = function(coord) {
 
     var popSize = {
             width: this.getElement().clientWidth + 20,
@@ -100,6 +118,9 @@ ol.Overlay.Popup.prototype.panIntoView = function(coord) {
 
 };
 
+/**
+ * Hide the popup.
+ */
 ol.Overlay.Popup.prototype.hide = function() {
     this.container.style.display = 'none';
     return this;
