@@ -94,25 +94,29 @@ ol.Overlay.Popup.prototype.panIntoView_ = function(coord) {
         fromBottom = mapSize[1] - (popPx[1] + tailHeight) - popOffset[1];
 
     var center = this.getMap().getView().getCenter(),
-        px = this.getMap().getPixelFromCoordinate(center);
+        curPx = this.getMap().getPixelFromCoordinate(center),
+        newPx = curPx.slice();
 
     if (fromRight < 0) {
-        px[0] -= fromRight;
+        newPx[0] -= fromRight;
     } else if (fromLeft < 0) {
-        px[0] += fromLeft;
+        newPx[0] += fromLeft;
     }
 
     if (fromTop < 0) {
-        px[1] += fromTop;
+        newPx[1] += fromTop;
     } else if (fromBottom < 0) {
-        px[1] -= fromBottom;
+        newPx[1] -= fromBottom;
     }
 
     if (this.ani && this.ani_opts) {
         this.ani_opts.source = center;
         this.getMap().beforeRender(this.ani(this.ani_opts));
     }
-    this.getMap().getView().setCenter(this.getMap().getCoordinateFromPixel(px));
+
+    if (newPx[0] !== curPx[0] || newPx[1] !== curPx[1]) {
+        this.getMap().getView().setCenter(this.getMap().getCoordinateFromPixel(newPx));
+    }
 
     return this.getMap().getView().getCenter();
 
