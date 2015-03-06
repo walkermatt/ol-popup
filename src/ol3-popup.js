@@ -95,25 +95,31 @@ ol.Overlay.Popup.prototype.panIntoView_ = function(coord) {
 
     var center = this.getMap().getView().getCenter(),
         px = this.getMap().getPixelFromCoordinate(center);
-
+    
+    var doShift = false;
     if (fromRight < 0) {
         px[0] -= fromRight;
+        doShift = true;
     } else if (fromLeft < 0) {
         px[0] += fromLeft;
+        doShift = true;
     }
 
     if (fromTop < 0) {
         px[1] += fromTop;
+        doShift = true;
     } else if (fromBottom < 0) {
         px[1] -= fromBottom;
+        doShift = true;
     }
 
     if (this.ani && this.ani_opts) {
         this.ani_opts.source = center;
         this.getMap().beforeRender(this.ani(this.ani_opts));
     }
-    this.getMap().getView().setCenter(this.getMap().getCoordinateFromPixel(px));
-
+    if (doShift) {
+        this.getMap().getView().setCenter(this.getMap().getCoordinateFromPixel(px));
+    }
     return this.getMap().getView().getCenter();
 
 };
