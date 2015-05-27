@@ -49,7 +49,7 @@
 }
 
 .ol-popup-closer:after {
-    content: "✖";
+    content: "\2716";
 }
 
 .ol-popup div.infoResult {
