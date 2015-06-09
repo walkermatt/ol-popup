@@ -67,6 +67,10 @@ ol.Overlay.Popup.prototype.show = function(coord, html) {
     if (this.panMapIfOutOfView) {
         this.panIntoView_(coord);
     }
+    var content = this.content;
+    window.setTimeout(function(){
+        content.scrollTop = 0;
+    }, 100);
     return this;
 };
 
