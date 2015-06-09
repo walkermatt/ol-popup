@@ -67,6 +67,7 @@ ol.Overlay.Popup.prototype.show = function(coord, html) {
     if (this.panMapIfOutOfView) {
         this.panIntoView_(coord);
     }
+    this.content.scrollTop = 0;
     return this;
 };
 
