@@ -46,6 +46,9 @@ ol.Overlay.Popup = function(opt_options) {
     this.content.className = 'ol-popup-content';
     this.container.appendChild(this.content);
 
+    // Apply workaround to enable scrolling of content div on touch devices
+    ol.Overlay.Popup.enableTouchScroll_(this.content);
+
     ol.Overlay.call(this, {
         element: this.container,
         stopEvent: true
@@ -121,6 +124,37 @@ ol.Overlay.Popup.prototype.panIntoView_ = function(coord) {
 
     return this.getMap().getView().getCenter();
 
+};
+
+/**
+ * @private
+ * @desc Determine if the current browser supports touch events. Adapted from
+ * https://gist.github.com/chrismbarr/4107472
+ */
+ol.Overlay.Popup.isTouchDevice_ = function() {
+    try {
+        document.createEvent("TouchEvent");
+        return true;
+    } catch(e) {
+        return false;
+    }
+};
+
+/**
+ * @private
+ * @desc Apply workaround to enable scrolling of overflowing content within an
+ * element. Adapted from https://gist.github.com/chrismbarr/4107472
+ */
+ol.Overlay.Popup.enableTouchScroll_ = function(elm) {
+    if(ol.Overlay.Popup.isTouchDevice_()){
+        var scrollStartPos = 0;
+        elm.addEventListener("touchstart", function(event) {
+            scrollStartPos = this.scrollTop + event.touches[0].pageY;
+        }, false);
+        elm.addEventListener("touchmove", function(event) {
+            this.scrollTop = scrollStartPos - event.touches[0].pageY;
+        }, false);
+    }
 };
 
 /**
