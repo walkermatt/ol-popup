@@ -1,20 +1,20 @@
 # OpenLayers 3 Popup
 
-Basic popup for an OL3 map. By default the map is centered so that the popup is
-entirely visible.
+Basic popup overlay for an [OL3](https://github.com/openlayers/ol3) map. By
+default the map is centred so that the popup is entirely visible.
 
-## Demo
+## Examples
 
-Clone or download the repository and open
-[examples/popup.html](examples/popup.html) in a browser or [view the example on
-RawGit](http://rawgit.com/walkermatt/ol3-popup/master/examples/popup.html).
-Click on the map to display a popup, click close to the edge of the map to see
-it pan into view.
+The examples demonstrate usage and can be viewed online thanks to [RawGit](http://rawgit.com/):
 
-## Credit
+* [Basic usage](http://rawgit.com/walkermatt/ol3-popup/master/examples/popup.html)
+    * Create a popup instance, show it on single-click specifying the content
+* [DOM Events](http://rawgit.com/walkermatt/ol3-popup/master/examples/dom-events.html)
+    * Handle DOM events triggered by interacting with elements within the popup content
+* [Scroll](http://rawgit.com/walkermatt/ol3-popup/master/examples/scroll.html)
+    * Controlling popup dimensions and scrolling overflowing content
 
-Based on an example by [Tim Schaub](https://github.com/tschaub) posted on the
-[OL3-Dev list](https://groups.google.com/forum/#!forum/ol3-dev).
+The source for all examples can be found in [examples](examples).
 
 ## API
 
@@ -54,6 +54,11 @@ Hide the popup.
 ## License
 
 MIT (c) Matt Walker.
+
+## Credit
+
+Based on an example by [Tim Schaub](https://github.com/tschaub) posted on the
+[OL3-Dev list](https://groups.google.com/forum/#!forum/ol3-dev).
 
 ## Also see
 
