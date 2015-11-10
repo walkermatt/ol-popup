@@ -13,6 +13,8 @@ The examples demonstrate usage and can be viewed online thanks to [RawGit](http:
     * Handle DOM events triggered by interacting with elements within the popup content
 * [Scroll](http://rawgit.com/walkermatt/ol3-popup/master/examples/scroll.html)
     * Controlling popup dimensions and scrolling overflowing content
+* [Multiple popups](http://rawgit.com/walkermatt/ol3-popup/master/examples/multiple.html)
+    * Add a new popup each time the maps is clicked
 
 The source for all examples can be found in [examples](examples).
 
