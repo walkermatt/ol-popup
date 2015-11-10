@@ -51,7 +51,8 @@ ol.Overlay.Popup = function(opt_options) {
 
     ol.Overlay.call(this, {
         element: this.container,
-        stopEvent: true
+        stopEvent: true,
+        insertFirst: (options.hasOwnProperty('insertFirst')) ? options.insertFirst : true
     });
 
 };
