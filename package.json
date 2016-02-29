@@ -18,7 +18,7 @@
     "doc": "node_modules/.bin/jsdoc --explain src/ol3-popup.js | node_modules/.bin/dirtydocs util/README.md > README.md"
   },
   "dependencies": {
-    "openlayers": "~3.3.0"
+    "openlayers": "~3.14.0"
   },
   "devDependencies": {
     "jsdoc": "~3.3.0-beta1",
