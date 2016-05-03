@@ -23,5 +23,8 @@
     "node_modules",
     "bower_components",
     "test"
-  ]
+  ],
+  "dependencies": {
+    "openlayers": "https://github.com/openlayers/ol3/releases/download/v3.15.1/v3.15.1-dist.zip"
+  }
 }
