@@ -18,6 +18,9 @@ class PageNavigator {
     pageInfo: HTMLSpanElement;
 
     constructor(public options: { pages: Paging }) {
+
+        let pages = options.pages;
+
         this.domNode = document.createElement("div");
         this.domNode.classList.add("pagination");
         this.domNode.innerHTML = this.template();
@@ -26,12 +29,25 @@ class PageNavigator {
         this.nextButton = <HTMLButtonElement>this.domNode.getElementsByClassName("btn-next")[0];
         this.pageInfo = <HTMLSpanElement>this.domNode.getElementsByClassName("page-num")[0];
 
-        options.pages.options.popup.container.appendChild(this.domNode);
+        pages.options.popup.container.appendChild(this.domNode);
         this.prevButton.addEventListener('click', () => this.dispatch('prev'));
         this.nextButton.addEventListener('click', () => this.dispatch('next'));
 
-        options.pages.on("goto", () => {
-            this.pageInfo.innerHTML = `${1 + options.pages.activeIndex} of ${options.pages.count}`;
+        pages.on("goto", () => this.show());
+        pages.on("clear", () => this.hide());
+
+        pages.on("goto", () => {
+            let index = pages.activeIndex;
+            let count = pages.count;
+            let canPrev = 0 < index;
+            let canNext = count - 1 > index;
+            this.prevButton.classList.toggle("inactive", !canPrev);
+            this.prevButton.classList.toggle("active", canPrev);
+            this.nextButton.classList.toggle("inactive", !canNext);
+            this.nextButton.classList.toggle("active", canNext);
+            this.prevButton.disabled = !canPrev;
+            this.nextButton.disabled = !canNext;
+            this.pageInfo.innerHTML = `${1 + index} of ${count}`;
         });
     }
 
@@ -50,7 +66,7 @@ class PageNavigator {
     hide() {
         this.domNode.classList.add("hidden");
     }
-    
+
     show() {
         this.domNode.classList.remove("hidden");
     }
@@ -201,8 +217,6 @@ class Popup extends ol.Overlay {
         pageNavigator.hide();
         pageNavigator.on("prev", () => pages.prev());
         pageNavigator.on("next", () => pages.next());
-        pages.on("add", () => pageNavigator.show());
-        pages.on("clear", () => pageNavigator.hide());
     }
 
     constructor(opt_options: IOptions = DEFAULTS) {
