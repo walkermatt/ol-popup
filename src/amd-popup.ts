@@ -10,7 +10,100 @@
  */
 import ol = require("openlayers");
 
-class PageNavigator {
+export class FeatureCreator {
+
+    constructor(public options: {
+        map: ol.Map;
+    }) {
+
+        let map = options.map;
+
+        let vectorSource = new ol.source.Vector({
+            features: []
+        });
+
+        let vectorLayer = new ol.layer.Vector({
+            source: vectorSource,
+            style: new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: 'rgba(255, 255, 255, 0.2)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: '#ffcc33',
+                    width: 2
+                }),
+                image: new ol.style.Circle({
+                    radius: 7,
+                    fill: new ol.style.Fill({
+                        color: '#ffcc33'
+                    })
+                })
+            })
+        });
+
+        let select = new ol.interaction.Select({
+            condition: (event: ol.MapBrowserEvent) =>
+                ol.events.condition.click(event) && ol.events.condition.altKeyOnly(event)
+        });
+
+        map.addInteraction(select);
+        map.addLayer(vectorLayer);
+
+        select.on("select", event => {
+            let coord = event.mapBrowserEvent.coordinate;
+            let geom = new ol.geom.Point(coord);
+            let feature = new ol.Feature({
+                geometry: geom,
+                name: "New Feature",
+                attributes: {}
+            });
+            vectorSource.addFeature(feature);
+        });
+
+    }
+}
+
+export class FeatureSelector {
+
+    constructor(public options: {
+        map: ol.Map;
+        popup: Popup;
+    }) {
+
+        let map = options.map;
+        
+        let select = new ol.interaction.Select({
+            multi: true,
+            condition: (event: ol.MapBrowserEvent) =>
+                ol.events.condition.singleClick(event) && !ol.events.condition.altKeyOnly(event)
+
+        });
+        
+        map.addInteraction(select);
+
+        select.on("select", event => {
+            let popup = options.popup;
+            let coord = event.mapBrowserEvent.coordinate;
+            let xy = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
+            var prettyCoord = ol.coordinate.toStringHDMS(xy);
+            popup.hide();
+            popup.show(coord, `<label><b>Alt+Click</b> creates Point feature at ${prettyCoord}</label>`);
+
+            debugger;
+                        
+            event.selected.forEach((feature, id) => {
+                let page = document.createElement('p');
+                page.innerHTML = `Page ${id + 1} ${feature.getGeometryName()}`;
+                popup.pages.add(page);
+            });
+
+            popup.pages.goto(0);
+        });
+
+    }
+}
+
+export class PageNavigator {
 
     private domNode: HTMLElement;
     prevButton: HTMLButtonElement;
@@ -72,7 +165,7 @@ class PageNavigator {
     }
 }
 
-class Paging {
+export class Paging {
 
     private _pages: Array<HTMLElement>;
     private activeChild: HTMLElement;
@@ -160,7 +253,7 @@ const DEFAULTS: IOptions = {
     ani_opts: { duration: 250 }
 }
 
-class Popup extends ol.Overlay {
+export class Popup extends ol.Overlay {
 
     panMapIfOutOfView: boolean;
     ani: any;
@@ -341,5 +434,3 @@ class Popup extends ol.Overlay {
         return this;
     }
 }
-
-export = Popup;
