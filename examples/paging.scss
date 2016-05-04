@@ -1,9 +1,28 @@
+.hidden {
+    display: none;
+}
+
+.pages {
+
+    .page {
+        min-width: 80px;
+        min-height: 80px;
+        margin: 2px;
+        padding: 2px;
+        border: 1px solid black;
+        border-radius: 4px;
+    }
+    
+}
+
 .pagination {
     
-    
+    min-width: 170px;
+    margin: 4px;
+       
     .arrow {
-        width: 20px;    
-        height: 20px;
+        width: 24px;    
+        height: 24px;
     }
 
     .btn-prev::after {
@@ -16,6 +35,7 @@
 
     .page-num {
          text-align: center;   
+         margin: 4px;
     }
     
 }

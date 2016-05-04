@@ -19,15 +19,18 @@ class PageNavigator {
 
     constructor(public options: { pages: Paging }) {
         this.domNode = document.createElement("div");
+        this.domNode.classList.add("pagination");
         this.domNode.innerHTML = this.template();
+
         this.prevButton = <HTMLButtonElement>this.domNode.getElementsByClassName("btn-prev")[0];
         this.nextButton = <HTMLButtonElement>this.domNode.getElementsByClassName("btn-next")[0];
         this.pageInfo = <HTMLSpanElement>this.domNode.getElementsByClassName("page-num")[0];
-        options.pages.domNode.appendChild(this.domNode);
+
+        options.pages.options.popup.container.appendChild(this.domNode);
         this.prevButton.addEventListener('click', () => this.dispatch('prev'));
         this.nextButton.addEventListener('click', () => this.dispatch('next'));
 
-        options.pages.on("goto", () => { 
+        options.pages.on("goto", () => {
             this.pageInfo.innerHTML = `${1 + options.pages.activeIndex} of ${options.pages.count}`;
         });
     }
@@ -41,33 +44,35 @@ class PageNavigator {
     }
 
     template() {
-        return `
-<div class="pagination">
-    <button class="arrow btn-prev">
-    </button>
-    <span class="page-num">m of n</span>
-    <button class="arrow btn-next">
-    </button>
-</div>`.trim();
+        return `<button class="arrow btn-prev"></button><span class="page-num">m of n</span><button class="arrow btn-next"></button>`;
     }
 
+    hide() {
+        this.domNode.classList.add("hidden");
+    }
+    
+    show() {
+        this.domNode.classList.remove("hidden");
+    }
 }
 
 class Paging {
 
     private _pages: Array<HTMLElement>;
     private activeChild: HTMLElement;
-    domNode: HTMLElement;
+    domNode: HTMLDivElement;
 
-    constructor(public options: { domNode: HTMLElement }) {
+    constructor(public options: { popup: Popup }) {
         this._pages = [];
-        this.domNode = options.domNode;
+        this.domNode = document.createElement("div");
+        this.domNode.classList.add("pages");
+        options.popup.container.appendChild(this.domNode);
     }
 
     get activeIndex() {
         return this._pages.indexOf(this.activeChild);
     }
-    
+
     get count() {
         return this._pages.length;
     }
@@ -81,7 +86,9 @@ class Paging {
     }
 
     add(page: HTMLElement) {
+        page.classList.add("page");
         this._pages.push(page);
+        this.dispatch("add");
     }
 
     clear() {
@@ -89,6 +96,7 @@ class Paging {
         if (this.activeChild) {
             this.domNode.removeChild(this.activeChild);
             this.activeChild = null;
+            this.dispatch("clear");
         }
     }
 
@@ -188,10 +196,13 @@ class Popup extends ol.Overlay {
     }
 
     private post() {
-        this.pages = new Paging({ domNode: this.container });
-        let navigator = new PageNavigator({ pages: this.pages });
-        navigator.on("prev", () => this.pages.prev());
-        navigator.on("next", () => this.pages.next());
+        let pages = this.pages = new Paging({ popup: this });
+        let pageNavigator = new PageNavigator({ pages: pages });
+        pageNavigator.hide();
+        pageNavigator.on("prev", () => pages.prev());
+        pageNavigator.on("next", () => pages.next());
+        pages.on("add", () => pageNavigator.show());
+        pages.on("clear", () => pageNavigator.hide());
     }
 
     constructor(opt_options: IOptions = DEFAULTS) {
