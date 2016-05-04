@@ -10,6 +10,37 @@
  */
 import ol = require("openlayers");
 
+/**
+ * @private
+ * @desc Determine if the current browser supports touch events. Adapted from
+ * https://gist.github.com/chrismbarr/4107472
+ */
+function isTouchDevice_() {
+    try {
+        document.createEvent("TouchEvent");
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
+ * @private
+ * @desc Apply workaround to enable scrolling of overflowing content within an
+ * element. Adapted from https://gist.github.com/chrismbarr/4107472
+ */
+function enableTouchScroll_(elm) {
+    if (isTouchDevice_()) {
+        var scrollStartPos = 0;
+        elm.addEventListener("touchstart", function (event) {
+            scrollStartPos = this.scrollTop + event.touches[0].pageY;
+        }, false);
+        elm.addEventListener("touchmove", function (event) {
+            this.scrollTop = scrollStartPos - event.touches[0].pageY;
+        }, false);
+    }
+}
+
 export class FeatureCreator {
 
     constructor(public options: {
@@ -71,14 +102,14 @@ export class FeatureSelector {
     }) {
 
         let map = options.map;
-        
+
         let select = new ol.interaction.Select({
             multi: true,
             condition: (event: ol.MapBrowserEvent) =>
                 ol.events.condition.singleClick(event) && !ol.events.condition.altKeyOnly(event)
 
         });
-        
+
         map.addInteraction(select);
 
         select.on("select", event => {
@@ -89,8 +120,6 @@ export class FeatureSelector {
             popup.hide();
             popup.show(coord, `<label><b>Alt+Click</b> creates Point feature at ${prettyCoord}</label>`);
 
-            debugger;
-                        
             event.selected.forEach((feature, id) => {
                 let page = document.createElement('p');
                 page.innerHTML = `Page ${id + 1} ${feature.getGeometryName()}`;
@@ -122,11 +151,11 @@ export class PageNavigator {
         this.nextButton = <HTMLButtonElement>this.domNode.getElementsByClassName("btn-next")[0];
         this.pageInfo = <HTMLSpanElement>this.domNode.getElementsByClassName("page-num")[0];
 
-        pages.options.popup.container.appendChild(this.domNode);
+        pages.options.popup.domNode.appendChild(this.domNode);
         this.prevButton.addEventListener('click', () => this.dispatch('prev'));
         this.nextButton.addEventListener('click', () => this.dispatch('next'));
 
-        pages.on("goto", () => this.show());
+        pages.on("goto", () => pages.count > 1 ? this.show() : this.hide());
         pages.on("clear", () => this.hide());
 
         pages.on("goto", () => {
@@ -158,10 +187,12 @@ export class PageNavigator {
 
     hide() {
         this.domNode.classList.add("hidden");
+        this.dispatch("hide");
     }
 
     show() {
         this.domNode.classList.remove("hidden");
+        this.dispatch("show");
     }
 }
 
@@ -175,7 +206,7 @@ export class Paging {
         this._pages = [];
         this.domNode = document.createElement("div");
         this.domNode.classList.add("pages");
-        options.popup.container.appendChild(this.domNode);
+        options.popup.domNode.appendChild(this.domNode);
     }
 
     get activeIndex() {
@@ -259,7 +290,7 @@ export class Popup extends ol.Overlay {
     ani: any;
     ani_opts: any;
     content: HTMLDivElement;
-    container: HTMLDivElement;
+    domNode: HTMLDivElement;
     closer: HTMLAnchorElement;
     pages: Paging;
 
@@ -280,13 +311,13 @@ export class Popup extends ol.Overlay {
             this.ani_opts = { 'duration': 250 };
         }
 
-        this.container = document.createElement('div');
-        this.container.className = 'ol-popup';
+        this.domNode = document.createElement('div');
+        this.domNode.className = 'ol-popup';
 
         this.closer = document.createElement('a');
         this.closer.className = 'ol-popup-closer';
         this.closer.href = '#';
-        this.container.appendChild(this.closer);
+        this.domNode.appendChild(this.closer);
 
         this.closer.addEventListener('click', evt => {
             this.hide();
@@ -296,10 +327,10 @@ export class Popup extends ol.Overlay {
 
         this.content = document.createElement('div');
         this.content.className = 'ol-popup-content';
-        this.container.appendChild(this.content);
+        this.domNode.appendChild(this.content);
 
         // Apply workaround to enable scrolling of content div on touch devices
-        Popup.enableTouchScroll_(this.content);
+        enableTouchScroll_(this.content);
 
         return options;
     }
@@ -318,12 +349,20 @@ export class Popup extends ol.Overlay {
         let options = this.pre(opt_options);
 
         super({
-            element: this.container,
+            element: this.domNode,
             stopEvent: true,
             insertFirst: (false !== options.insertFirst ? true : options.insertFirst)
         });
 
         this.post();
+    }
+
+    dispatch(name: string) {
+        this.domNode.dispatchEvent(new Event(name));
+    }
+
+    on(name: string, listener: EventListener) {
+        this.domNode.addEventListener(name, listener);
     }
 
     /**
@@ -334,11 +373,22 @@ export class Popup extends ol.Overlay {
     show(coord, html) {
         this.setPosition(coord);
         this.content.innerHTML = html;
-        this.container.style.display = 'block';
+        this.domNode.style.display = 'block';
         if (this.panMapIfOutOfView) {
             this.panIntoView_(coord);
         }
         this.content.scrollTop = 0;
+        this.dispatch("show");
+        return this;
+    }
+
+    /**
+     * Hide the popup.
+     */
+    hide() {
+        this.domNode.style.display = 'none';
+        this.pages.clear();
+        this.dispatch("hide");
         return this;
     }
 
@@ -394,43 +444,4 @@ export class Popup extends ol.Overlay {
 
     }
 
-    /**
-     * @private
-     * @desc Determine if the current browser supports touch events. Adapted from
-     * https://gist.github.com/chrismbarr/4107472
-     */
-    private static isTouchDevice_() {
-        try {
-            document.createEvent("TouchEvent");
-            return true;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    /**
-     * @private
-     * @desc Apply workaround to enable scrolling of overflowing content within an
-     * element. Adapted from https://gist.github.com/chrismbarr/4107472
-     */
-    private static enableTouchScroll_(elm) {
-        if (Popup.isTouchDevice_()) {
-            var scrollStartPos = 0;
-            elm.addEventListener("touchstart", function (event) {
-                scrollStartPos = this.scrollTop + event.touches[0].pageY;
-            }, false);
-            elm.addEventListener("touchmove", function (event) {
-                this.scrollTop = scrollStartPos - event.touches[0].pageY;
-            }, false);
-        }
-    }
-
-    /**
-     * Hide the popup.
-     */
-    hide() {
-        this.container.style.display = 'none';
-        this.pages.clear();
-        return this;
-    }
 }
