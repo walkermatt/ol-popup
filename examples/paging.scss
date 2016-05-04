@@ -1,0 +1,21 @@
+.pagination {
+    
+    
+    .arrow {
+        width: 20px;    
+        height: 20px;
+    }
+
+    .btn-prev::after {
+        content: "⇦";
+    }
+    
+    .btn-next::after {
+        content: "⇨";
+    }
+
+    .page-num {
+         text-align: center;   
+    }
+    
+}

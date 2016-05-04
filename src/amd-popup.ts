@@ -10,6 +10,119 @@
  */
 import ol = require("openlayers");
 
+class PageNavigator {
+
+    private domNode: HTMLElement;
+    prevButton: HTMLButtonElement;
+    nextButton: HTMLButtonElement;
+    pageInfo: HTMLSpanElement;
+
+    constructor(public options: { pages: Paging }) {
+        this.domNode = document.createElement("div");
+        this.domNode.innerHTML = this.template();
+        this.prevButton = <HTMLButtonElement>this.domNode.getElementsByClassName("btn-prev")[0];
+        this.nextButton = <HTMLButtonElement>this.domNode.getElementsByClassName("btn-next")[0];
+        this.pageInfo = <HTMLSpanElement>this.domNode.getElementsByClassName("page-num")[0];
+        options.pages.domNode.appendChild(this.domNode);
+        this.prevButton.addEventListener('click', () => this.dispatch('prev'));
+        this.nextButton.addEventListener('click', () => this.dispatch('next'));
+
+        options.pages.on("goto", () => { 
+            this.pageInfo.innerHTML = `${1 + options.pages.activeIndex} of ${options.pages.count}`;
+        });
+    }
+
+    dispatch(name: string) {
+        this.domNode.dispatchEvent(new Event(name));
+    }
+
+    on(name: string, listener: EventListener) {
+        this.domNode.addEventListener(name, listener);
+    }
+
+    template() {
+        return `
+<div class="pagination">
+    <button class="arrow btn-prev">
+    </button>
+    <span class="page-num">m of n</span>
+    <button class="arrow btn-next">
+    </button>
+</div>`.trim();
+    }
+
+}
+
+class Paging {
+
+    private _pages: Array<HTMLElement>;
+    private activeChild: HTMLElement;
+    domNode: HTMLElement;
+
+    constructor(public options: { domNode: HTMLElement }) {
+        this._pages = [];
+        this.domNode = options.domNode;
+    }
+
+    get activeIndex() {
+        return this._pages.indexOf(this.activeChild);
+    }
+    
+    get count() {
+        return this._pages.length;
+    }
+
+    dispatch(name: string) {
+        this.domNode.dispatchEvent(new Event(name));
+    }
+
+    on(name: string, listener: EventListener) {
+        this.domNode.addEventListener(name, listener);
+    }
+
+    add(page: HTMLElement) {
+        this._pages.push(page);
+    }
+
+    clear() {
+        this._pages = [];
+        if (this.activeChild) {
+            this.domNode.removeChild(this.activeChild);
+            this.activeChild = null;
+        }
+    }
+
+    goto(index: number) {
+        let page = this._pages[index];
+        if (page) {
+            if (this.activeChild) {
+                this.domNode.removeChild(this.activeChild);
+            }
+            this.domNode.appendChild(page);
+            this.activeChild = page;
+            this.dispatch("goto");
+        }
+    }
+
+    next() {
+        if (this.activeChild) {
+            let activeIndex = this._pages.indexOf(this.activeChild);
+            if (0 <= activeIndex) {
+                this.goto(activeIndex + 1);
+            }
+        }
+    }
+
+    prev() {
+        if (this.activeChild) {
+            let activeIndex = this._pages.indexOf(this.activeChild);
+            if (0 <= activeIndex) {
+                this.goto(activeIndex - 1);
+            }
+        }
+    }
+}
+
 interface IOptions extends olx.OverlayOptions {
     insertFirst?: boolean;
     panMapIfOutOfView?: boolean;
@@ -31,8 +144,9 @@ class Popup extends ol.Overlay {
     content: HTMLDivElement;
     container: HTMLDivElement;
     closer: HTMLAnchorElement;
+    pages: Paging;
 
-// trick to eliminate warnings due to calling super in the wrong sequence    
+    // hack to eliminate warnings due to calling super in the wrong sequence    
     private pre(options: IOptions) {
         this.panMapIfOutOfView = options.panMapIfOutOfView;
         if (this.panMapIfOutOfView === undefined) {
@@ -58,7 +172,7 @@ class Popup extends ol.Overlay {
         this.container.appendChild(this.closer);
 
         this.closer.addEventListener('click', evt => {
-            this.container.style.display = 'none';
+            this.hide();
             this.closer.blur();
             evt.preventDefault();
         }, false);
@@ -73,8 +187,16 @@ class Popup extends ol.Overlay {
         return options;
     }
 
-    constructor(opt_options?: IOptions = DEFAULTS) {
-        
+    private post() {
+        this.pages = new Paging({ domNode: this.container });
+        let navigator = new PageNavigator({ pages: this.pages });
+        navigator.on("prev", () => this.pages.prev());
+        navigator.on("next", () => this.pages.next());
+    }
+
+    constructor(opt_options: IOptions = DEFAULTS) {
+
+        // awkward ol3 construction not meant to be called first so suffer the warnings
         let options = this.pre(opt_options);
 
         super({
@@ -82,6 +204,8 @@ class Popup extends ol.Overlay {
             stopEvent: true,
             insertFirst: (false !== options.insertFirst ? true : options.insertFirst)
         });
+
+        this.post();
     }
 
     /**
@@ -188,6 +312,7 @@ class Popup extends ol.Overlay {
      */
     hide() {
         this.container.style.display = 'none';
+        this.pages.clear();
         return this;
     }
 }

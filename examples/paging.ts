@@ -20,7 +20,16 @@ export function run() {
 
 
     map.on('singleclick', function (evt) {
-        var prettyCoord = ol.coordinate.toStringHDMS(ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326'), 2);
+        let xy = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
+        var prettyCoord = ol.coordinate.toStringHDMS(xy);
+        popup.hide();
         popup.show(evt.coordinate, '<div><h2>Coordinates</h2><p>' + prettyCoord + '</p></div>');
+        
+        [1, 2, 3].forEach(id => {
+            let page = document.createElement('div');
+            page.innerHTML = `Page ${id}`;
+            popup.pages.add(page);
+        });
+        popup.pages.goto(0);
     });
 }
