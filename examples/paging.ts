@@ -1,5 +1,5 @@
 import ol = require("openlayers");
-import Popup = require("../src/amd-popup");
+import Popup = require("../src/ol3-popup");
 
 export function run() {
     var map = new ol.Map({
