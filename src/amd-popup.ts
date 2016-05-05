@@ -10,37 +10,38 @@
  */
 import ol = require("openlayers");
 
-/**
- * @private
- * @desc Determine if the current browser supports touch events. Adapted from
- * https://gist.github.com/chrismbarr/4107472
- */
-function isTouchDevice_() {
+function mixin<A, B>(a: A, b: B): A & B {
+    Object.keys(b).filter(k => typeof a[k] === undefined).forEach(k => a[k] = b[k]);
+    return <A & B>a;
+}
+
+let isTouchDevice = () => {
     try {
         document.createEvent("TouchEvent");
-        return true;
+        isTouchDevice = () => true;
     } catch (e) {
-        return false;
+        isTouchDevice = () => false;
     }
+    return isTouchDevice();
+};
+
+/**
+ * Apply workaround to enable scrolling of overflowing content within an
+ * element. Adapted from https://gist.github.com/chrismbarr/4107472
+ */
+function enableTouchScroll(elm: HTMLElement) {
+    var scrollStartPos = 0;
+    elm.addEventListener("touchstart", function (event) {
+        scrollStartPos = this.scrollTop + event.touches[0].pageY;
+    }, false);
+    elm.addEventListener("touchmove", function (event) {
+        this.scrollTop = scrollStartPos - event.touches[0].pageY;
+    }, false);
 }
 
 /**
- * @private
- * @desc Apply workaround to enable scrolling of overflowing content within an
- * element. Adapted from https://gist.github.com/chrismbarr/4107472
+ * Used for testing, will create features when Alt+Clicking the map
  */
-function enableTouchScroll_(elm) {
-    if (isTouchDevice_()) {
-        var scrollStartPos = 0;
-        elm.addEventListener("touchstart", function (event) {
-            scrollStartPos = this.scrollTop + event.touches[0].pageY;
-        }, false);
-        elm.addEventListener("touchmove", function (event) {
-            this.scrollTop = scrollStartPos - event.touches[0].pageY;
-        }, false);
-    }
-}
-
 export class FeatureCreator {
 
     constructor(public options: {
@@ -94,11 +95,15 @@ export class FeatureCreator {
     }
 }
 
+/**
+ * Interaction which opens the popup when zero or more features are clicked
+ */
 export class FeatureSelector {
 
     constructor(public options: {
         map: ol.Map;
         popup: Popup;
+        title: string;
     }) {
 
         let map = options.map;
@@ -115,10 +120,8 @@ export class FeatureSelector {
         select.on("select", event => {
             let popup = options.popup;
             let coord = event.mapBrowserEvent.coordinate;
-            let xy = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
-            var prettyCoord = ol.coordinate.toStringHDMS(xy);
             popup.hide();
-            popup.show(coord, `<label><b>Alt+Click</b> creates Point feature at ${prettyCoord}</label>`);
+            popup.show(coord, `<label>${this.options.title}</label>`);
 
             event.selected.forEach((feature, id) => {
                 let page = document.createElement('p');
@@ -132,6 +135,9 @@ export class FeatureSelector {
     }
 }
 
+/**
+ * The prior + next paging buttons and current page indicator
+ */
 export class PageNavigator {
 
     private domNode: HTMLElement;
@@ -196,6 +202,9 @@ export class PageNavigator {
     }
 }
 
+/**
+ * Collection of "pages"
+ */
 export class Paging {
 
     private _pages: Array<HTMLElement>;
@@ -253,37 +262,38 @@ export class Paging {
     }
 
     next() {
-        if (this.activeChild) {
-            let activeIndex = this._pages.indexOf(this.activeChild);
-            if (0 <= activeIndex) {
-                this.goto(activeIndex + 1);
-            }
-        }
+        (0 <= this.activeIndex) && (this.activeIndex < this.count) && this.goto(this.activeIndex + 1);
     }
 
     prev() {
-        if (this.activeChild) {
-            let activeIndex = this._pages.indexOf(this.activeChild);
-            if (0 <= activeIndex) {
-                this.goto(activeIndex - 1);
-            }
-        }
+        (0 < this.activeIndex) && this.goto(this.activeIndex - 1);
     }
 }
 
-interface IOptions extends olx.OverlayOptions {
+
+/**
+ * The constructor options 'must' conform
+ */
+interface IPopupOptions extends olx.OverlayOptions {
     insertFirst?: boolean;
     panMapIfOutOfView?: boolean;
     ani?: any;
     ani_opts?: any;
 };
 
-const DEFAULTS: IOptions = {
+/**
+ * Default options for the popup control so it can be created without any contructor arguments 
+ */
+const DEFAULT_OPTIONS: IPopupOptions = {
+    insertFirst: true,
     panMapIfOutOfView: true,
     ani: ol.animation.pan,
     ani_opts: { duration: 250 }
 }
 
+/**
+ * The control formerly known as ol.Overlay.Popup 
+ */
 export class Popup extends ol.Overlay {
 
     panMapIfOutOfView: boolean;
@@ -294,8 +304,18 @@ export class Popup extends ol.Overlay {
     closer: HTMLAnchorElement;
     pages: Paging;
 
-    // hack to eliminate warnings due to calling super in the wrong sequence    
-    private pre(options: IOptions) {
+    constructor(options = DEFAULT_OPTIONS) {
+
+        super({
+            stopEvent: true,
+            insertFirst: (false !== options.insertFirst ? true : options.insertFirst)
+        });
+
+        this.postCreate(mixin(options, DEFAULT_OPTIONS));
+    }
+
+    private postCreate(options: IPopupOptions) {
+
         this.panMapIfOutOfView = options.panMapIfOutOfView;
         if (this.panMapIfOutOfView === undefined) {
             this.panMapIfOutOfView = true;
@@ -311,31 +331,28 @@ export class Popup extends ol.Overlay {
             this.ani_opts = { 'duration': 250 };
         }
 
-        this.domNode = document.createElement('div');
-        this.domNode.className = 'ol-popup';
+        let domNode = this.domNode = document.createElement('div');
+        domNode.className = 'ol-popup';
+        this.setElement(domNode);
 
-        this.closer = document.createElement('a');
-        this.closer.className = 'ol-popup-closer';
-        this.closer.href = '#';
-        this.domNode.appendChild(this.closer);
+        let closer = this.closer = document.createElement('a');
+        closer.className = 'ol-popup-closer';
+        closer.href = '#';
+        domNode.appendChild(closer);
 
-        this.closer.addEventListener('click', evt => {
+        closer.addEventListener('click', evt => {
             this.hide();
-            this.closer.blur();
+            closer.blur();
             evt.preventDefault();
         }, false);
 
-        this.content = document.createElement('div');
-        this.content.className = 'ol-popup-content';
-        this.domNode.appendChild(this.content);
+        let content = this.content = document.createElement('div');
+        content.className = 'ol-popup-content';
+        this.domNode.appendChild(content);
 
         // Apply workaround to enable scrolling of content div on touch devices
-        enableTouchScroll_(this.content);
+        isTouchDevice() && enableTouchScroll(content);
 
-        return options;
-    }
-
-    private post() {
         let pages = this.pages = new Paging({ popup: this });
         let pageNavigator = new PageNavigator({ pages: pages });
         pageNavigator.hide();
@@ -343,48 +360,22 @@ export class Popup extends ol.Overlay {
         pageNavigator.on("next", () => pages.next());
     }
 
-    constructor(opt_options: IOptions = DEFAULTS) {
-
-        // awkward ol3 construction not meant to be called first so suffer the warnings
-        let options = this.pre(opt_options);
-
-        super({
-            element: this.domNode,
-            stopEvent: true,
-            insertFirst: (false !== options.insertFirst ? true : options.insertFirst)
-        });
-
-        this.post();
-    }
-
     dispatch(name: string) {
-        this.domNode.dispatchEvent(new Event(name));
+        this["dispatchEvent"](new Event(name));
     }
 
-    on(name: string, listener: EventListener) {
-        this.domNode.addEventListener(name, listener);
-    }
-
-    /**
-     * Show the popup.
-     * @param {ol.Coordinate} coord Where to anchor the popup.
-     * @param {String} html String of HTML to display within the popup.
-     */
-    show(coord, html) {
+    show(coord: ol.Coordinate, html: string) {
         this.setPosition(coord);
         this.content.innerHTML = html;
         this.domNode.style.display = 'block';
         if (this.panMapIfOutOfView) {
-            this.panIntoView_(coord);
+            this.panIntoView(coord);
         }
         this.content.scrollTop = 0;
         this.dispatch("show");
         return this;
     }
 
-    /**
-     * Hide the popup.
-     */
     hide() {
         this.domNode.style.display = 'none';
         this.pages.clear();
@@ -392,10 +383,7 @@ export class Popup extends ol.Overlay {
         return this;
     }
 
-    /**
-     * @private
-     */
-    private panIntoView_(coord) {
+    private panIntoView(coord) {
 
         var popSize = {
             width: this.getElement().clientWidth + 20,

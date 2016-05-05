@@ -20,7 +20,8 @@ export function run() {
 
     let selector = new Popup.FeatureSelector({
         map: map,
-        popup: popup
+        popup: popup,
+        title: "Alt+Click creates markers",
     });
     
     new Popup.FeatureCreator({ map: map });
