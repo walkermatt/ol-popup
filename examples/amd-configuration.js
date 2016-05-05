@@ -1,7 +1,5 @@
 require.config({
-    
     baseUrl: '../src',
-    
     packages: [
         {
             name: 'openlayers',
@@ -9,7 +7,6 @@ require.config({
             main: 'ol-debug'
         }
     ],
-    
-    callback: () => {
-   } 
+    callback: function () {
+    }
 });
