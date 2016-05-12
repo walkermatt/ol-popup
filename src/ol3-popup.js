@@ -297,7 +297,7 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
             this.setPosition(coord);
             this.content.innerHTML = html;
             this.domNode.classList.remove("hidden");
-            if (this.options.panMapIfOutOfView !== false) {
+            if (this.options.panMapIfOutOfView !== false && !this.isDetached()) {
                 this.panIntoView(coord);
             }
             this.content.scrollTop = 0;
@@ -309,9 +309,6 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
             this.pages.clear();
             this.dispatch("hide");
             return this;
-        };
-        Popup.prototype.isDetached = function () {
-            return this.domNode.classList.contains(classNames.DETACH);
         };
         Popup.prototype.detach = function () {
             var _this = this;
@@ -325,6 +322,9 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
                     parent.appendChild(_this.domNode);
                 }
             };
+        };
+        Popup.prototype.isDetached = function () {
+            return this.domNode.classList.contains(classNames.DETACH);
         };
         Popup.prototype.panIntoView = function (coord) {
             var popSize = {

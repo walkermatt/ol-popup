@@ -370,7 +370,7 @@ export class Popup extends ol.Overlay {
         this.content.innerHTML = html;
         this.domNode.classList.remove("hidden");
 
-        if (this.options.panMapIfOutOfView !== false) {
+        if (this.options.panMapIfOutOfView !== false && !this.isDetached()) {
             this.panIntoView(coord);
         }
         this.content.scrollTop = 0;
@@ -383,10 +383,6 @@ export class Popup extends ol.Overlay {
         this.pages.clear();
         this.dispatch("hide");
         return this;
-    }
-
-    private isDetached() {
-        return this.domNode.classList.contains(classNames.DETACH);
     }
 
     detach() {
@@ -402,6 +398,11 @@ export class Popup extends ol.Overlay {
         };
 
     }
+    
+    private isDetached() {
+        return this.domNode.classList.contains(classNames.DETACH);
+    }
+
     private panIntoView(coord) {
 
         var popSize = {
