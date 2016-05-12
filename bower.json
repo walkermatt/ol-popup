@@ -1,6 +1,6 @@
 {
   "name": "ol3-popup",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "homepage": "https://github.com/ca0v/ol3-popup",
   "authors": [
     "Matt Walker (http://longwayaround.org.uk)",
@@ -23,9 +23,14 @@
     "**/.*",
     "node_modules",
     "bower_components",
-    "test"
+    "typings",
+    "examples",
+    "util",
+    "test",
+    "*.json"
   ],
   "dependencies": {
-    "openlayers": "https://github.com/openlayers/ol3/releases/download/v3.15.1/v3.15.1-dist.zip"
+    "openlayers": "https://github.com/openlayers/ol3/releases/download/v3.15.1/v3.15.1-dist.zip",
+    "requirejs": "^2.2.0"
   }
 }

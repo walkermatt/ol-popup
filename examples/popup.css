@@ -1,3 +1,6 @@
+@import url("../bower_components/openlayers/ol.css");
+@import url("../src/ol3-popup.css");
+
 html, body {
   height: 100%;
   padding: 0;

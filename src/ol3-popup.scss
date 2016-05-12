@@ -1,0 +1,135 @@
+//colors
+$white: white;
+$color_celeste_approx: #cccccc;
+$gray: gray;
+$black: rgb(16, 16, 16);
+$dark: rgb(128, 128, 128);
+
+@mixin noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Chrome/Safari/Opera */
+  -khtml-user-select: none;    /* Konqueror */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;           /* Non-prefixed version, currently */
+}
+
+//@extend-elements
+//original selectors
+//.ol-popup:after, .ol-popup:before
+%extend_1 {
+	top: 100%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+	left: 48px;
+}
+
+.ol-popup {
+	display: none;
+	position: absolute;
+	background-color: $white;
+	padding: 15px 25px 15px 15px;
+	border: 1px solid $color_celeste_approx;
+    border-radius: 12px;
+	bottom: 12px;
+	left: -50px;
+    
+	&:after {
+		@extend %extend_1;
+		border-top-color: $white;
+		border-width: 10px;
+		margin-left: -10px;
+	}
+    
+	&:before {
+		@extend %extend_1;
+		border-top-color: $color_celeste_approx;
+		border-width: 11px;
+		margin-left: -11px;
+	}
+    
+	&.marker {
+		margin-bottom: 30px;
+	}
+    
+    .hidden {
+        display: none;
+    }
+
+	div.infoResult {
+		min-width: 130px;
+		p {
+			padding: 0.1em;
+			margin: 0;
+		}
+	}
+    
+    .ol-popup-content {
+        min-width: 170px;
+        max-height: 200px;
+        overflow-x: auto;
+        h3 {
+            margin: 0.25em 0;
+        }
+    }
+    
+    .ol-popup-closer {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        font-size: 150%;
+        padding: 0 4px;
+        color: $gray;
+        text-decoration: none;
+        &:after {
+            content: "\2716";
+        }
+    }
+
+    .pages {
+
+        .page {
+            color:  $black;
+            min-width: 80px;
+            min-height: 80px;
+            margin: 2px;
+            padding: 2px;
+            border: 1px solid $dark;
+            border-radius: 4px;
+        }
+        
+    }
+
+    .pagination {
+        
+        color:  $black;
+        min-width: 170px;
+        margin: 4px;
+        
+        .arrow {
+            width: 24px;    
+            height: 24px;
+        }
+
+        .btn-prev::after {
+            content: "⇦";
+        }
+        
+        .btn-next::after {
+            content: "⇨";
+        }
+
+        .page-num {
+            color:  $dark;
+            text-align: center;   
+            margin: 4px;
+            @include noselect;
+        }
+        
+    }
+
+}

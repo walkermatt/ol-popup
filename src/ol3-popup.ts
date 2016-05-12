@@ -274,7 +274,7 @@ export class Paging {
 /**
  * The constructor options 'must' conform
  */
-interface IPopupOptions extends olx.OverlayOptions {
+export interface IPopupOptions extends olx.OverlayOptions {
     insertFirst?: boolean;
     panMapIfOutOfView?: boolean;
     ani?: any;
