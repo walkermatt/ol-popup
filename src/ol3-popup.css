@@ -10,7 +10,6 @@
   left: 48px; }
 
 .ol-popup {
-  display: none;
   position: absolute;
   background-color: white;
   padding: 15px 25px 15px 15px;
@@ -28,8 +27,16 @@
     margin-left: -11px; }
   .ol-popup.marker {
     margin-bottom: 30px; }
-  .ol-popup .hidden {
+  .ol-popup.hidden, .ol-popup .hidden {
     display: none; }
+  .ol-popup.detach {
+    position: initial; }
+    .ol-popup.detach:after {
+      display: none; }
+    .ol-popup.detach:before {
+      display: none; }
+    .ol-popup.detach .ol-popup-closer {
+      position: initial; }
   .ol-popup div.infoResult {
     min-width: 130px; }
     .ol-popup div.infoResult p {

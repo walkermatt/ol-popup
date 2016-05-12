@@ -3,9 +3,11 @@ import Popup = require("../src/ol3-popup");
 
 let center = ol.proj.transform([-0.92, 52.96], 'EPSG:4326', 'EPSG:3857');
 
+let mapContainer = document.getElementById("map");
+
 export function run() {
     let map = new ol.Map({
-        target: 'map',
+        target: mapContainer,
         layers: [
             new ol.layer.Tile({
                 source: new ol.source.OSM()
@@ -27,7 +29,14 @@ export function run() {
         popup.show(center, "<div>Click the map to see a popup</div>");
         let pages = 0;
         let h = setInterval(() => {
-            if (++pages === 5) clearInterval(h);
+            if (++pages === 5) {
+                clearInterval(h);
+                let attach = popup.detach();
+                let h2 = popup.on("hide", () => {
+                    popup.unByKey(h2);
+                    attach.off();
+                });
+            }
             let div = document.createElement("div");
             div.innerHTML = `PAGE ${pages}`;
             popup.pages.add(div);
@@ -42,5 +51,5 @@ export function run() {
     });
     
     new Popup.FeatureCreator({ map: map });
-    
+
 }

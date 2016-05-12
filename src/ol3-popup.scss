@@ -29,7 +29,6 @@ $dark: rgb(128, 128, 128);
 }
 
 .ol-popup {
-	display: none;
 	position: absolute;
 	background-color: $white;
 	padding: 15px 25px 15px 15px;
@@ -56,9 +55,26 @@ $dark: rgb(128, 128, 128);
 		margin-bottom: 30px;
 	}
     
-    .hidden {
+    &.hidden, .hidden {
         display: none;
     }
+
+	&.detach {
+		position: initial;
+		
+		&:after {
+			display: none;
+		}
+		
+		&:before {
+			display: none;
+		}
+			
+		.ol-popup-closer {
+			position: initial;
+		}
+		
+	}
 
 	div.infoResult {
 		min-width: 130px;

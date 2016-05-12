@@ -10,6 +10,10 @@
  */
 import ol = require("openlayers");
 
+let classNames = {
+    DETACH: 'detach'
+};
+
 function mixin<A, B>(a: A, b: B): A & B {
     Object.keys(b).filter(k => typeof a[k] === undefined).forEach(k => a[k] = b[k]);
     return <A & B>a;
@@ -295,8 +299,7 @@ const DEFAULT_OPTIONS: IPopupOptions = {
  * The control formerly known as ol.Overlay.Popup 
  */
 export class Popup extends ol.Overlay {
-
-    panMapIfOutOfView: boolean;
+    options: IPopupOptions;
     ani: any;
     ani_opts: any;
     content: HTMLDivElement;
@@ -311,16 +314,13 @@ export class Popup extends ol.Overlay {
             insertFirst: (false !== options.insertFirst ? true : options.insertFirst)
         });
 
-        this.postCreate(mixin(options, DEFAULT_OPTIONS));
+        this.options = mixin(options, DEFAULT_OPTIONS);
+        this.postCreate();
     }
 
-    private postCreate(options: IPopupOptions) {
+    private postCreate() {
 
-        this.panMapIfOutOfView = options.panMapIfOutOfView;
-        if (this.panMapIfOutOfView === undefined) {
-            this.panMapIfOutOfView = true;
-        }
-
+        let options = this.options;
         this.ani = options.ani;
         if (this.ani === undefined) {
             this.ani = ol.animation.pan;
@@ -363,12 +363,14 @@ export class Popup extends ol.Overlay {
     dispatch(name: string) {
         this["dispatchEvent"](new Event(name));
     }
-
+    
     show(coord: ol.Coordinate, html: string) {
         this.setPosition(coord);
+
         this.content.innerHTML = html;
-        this.domNode.style.display = 'block';
-        if (this.panMapIfOutOfView) {
+        this.domNode.classList.remove("hidden");
+
+        if (this.options.panMapIfOutOfView !== false) {
             this.panIntoView(coord);
         }
         this.content.scrollTop = 0;
@@ -377,12 +379,29 @@ export class Popup extends ol.Overlay {
     }
 
     hide() {
-        this.domNode.style.display = 'none';
+        this.domNode.classList.add("hidden");
         this.pages.clear();
         this.dispatch("hide");
         return this;
     }
 
+    private isDetached() {
+        return this.domNode.classList.contains(classNames.DETACH);
+    }
+
+    detach() {
+        let mapContainer = <HTMLElement>this.getMap().get("target");
+        let parent = this.domNode.parentElement;
+        mapContainer.parentNode.insertBefore(this.domNode, mapContainer.nextElementSibling);
+        this.domNode.classList.add(classNames.DETACH);
+        return {
+            off: () => {
+                this.domNode.classList.remove(classNames.DETACH);
+                parent.appendChild(this.domNode);
+            }
+        };
+
+    }
     private panIntoView(coord) {
 
         var popSize = {

@@ -5,6 +5,9 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 define(["require", "exports", "openlayers"], function (require, exports, ol) {
     "use strict";
+    var classNames = {
+        DETACH: 'detach'
+    };
     function mixin(a, b) {
         Object.keys(b).filter(function (k) { return typeof a[k] === undefined; }).forEach(function (k) { return a[k] = b[k]; });
         return a;
@@ -250,14 +253,12 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
                 stopEvent: true,
                 insertFirst: (false !== options.insertFirst ? true : options.insertFirst)
             });
-            this.postCreate(mixin(options, DEFAULT_OPTIONS));
+            this.options = mixin(options, DEFAULT_OPTIONS);
+            this.postCreate();
         }
-        Popup.prototype.postCreate = function (options) {
+        Popup.prototype.postCreate = function () {
             var _this = this;
-            this.panMapIfOutOfView = options.panMapIfOutOfView;
-            if (this.panMapIfOutOfView === undefined) {
-                this.panMapIfOutOfView = true;
-            }
+            var options = this.options;
             this.ani = options.ani;
             if (this.ani === undefined) {
                 this.ani = ol.animation.pan;
@@ -295,8 +296,8 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
         Popup.prototype.show = function (coord, html) {
             this.setPosition(coord);
             this.content.innerHTML = html;
-            this.domNode.style.display = 'block';
-            if (this.panMapIfOutOfView) {
+            this.domNode.classList.remove("hidden");
+            if (this.options.panMapIfOutOfView !== false) {
                 this.panIntoView(coord);
             }
             this.content.scrollTop = 0;
@@ -304,10 +305,26 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
             return this;
         };
         Popup.prototype.hide = function () {
-            this.domNode.style.display = 'none';
+            this.domNode.classList.add("hidden");
             this.pages.clear();
             this.dispatch("hide");
             return this;
+        };
+        Popup.prototype.isDetached = function () {
+            return this.domNode.classList.contains(classNames.DETACH);
+        };
+        Popup.prototype.detach = function () {
+            var _this = this;
+            var mapContainer = this.getMap().get("target");
+            var parent = this.domNode.parentElement;
+            mapContainer.parentNode.insertBefore(this.domNode, mapContainer.nextElementSibling);
+            this.domNode.classList.add(classNames.DETACH);
+            return {
+                off: function () {
+                    _this.domNode.classList.remove(classNames.DETACH);
+                    parent.appendChild(_this.domNode);
+                }
+            };
         };
         Popup.prototype.panIntoView = function (coord) {
             var popSize = {
