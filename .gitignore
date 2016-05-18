@@ -5,3 +5,4 @@ typings
 *.js
 *.css
 *.d.ts
+*.log
