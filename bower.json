@@ -29,7 +29,7 @@
     "test",
     "*.json"
   ],
-  "dependencies": {
+  "devDependencies": {
     "openlayers": "https://github.com/openlayers/ol3/releases/download/v3.15.1/v3.15.1-dist.zip",
     "requirejs": "^2.2.0"
   }
