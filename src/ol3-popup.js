@@ -8,8 +8,14 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
     var classNames = {
         DETACH: 'detach'
     };
-    function mixin(a, b) {
-        Object.keys(b).filter(function (k) { return typeof a[k] === undefined; }).forEach(function (k) { return a[k] = b[k]; });
+    function defaults(a) {
+        var b = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            b[_i - 1] = arguments[_i];
+        }
+        b.forEach(function (b) {
+            Object.keys(b).filter(function (k) { return typeof a[k] === undefined; }).forEach(function (k) { return a[k] = b[k]; });
+        });
         return a;
     }
     var isTouchDevice = function () {
@@ -99,7 +105,21 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
                 }
             });
             map.addInteraction(select);
+            map.on("click", function (event) {
+                console.log("click");
+                var popup = options.popup;
+                var coord = event.coordinate;
+                popup.hide();
+                popup.show(coord, "<label>" + _this.options.title + "</label>");
+                map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
+                    var page = document.createElement('p');
+                    page.innerHTML = "Page " + feature.get("id") + " " + feature.getGeometryName();
+                    popup.pages.add(page);
+                });
+            });
             select.on("select", function (event) {
+                console.log("select");
+                console.log("total selected:", event.selected.length);
                 var popup = options.popup;
                 var coord = event.mapBrowserEvent.coordinate;
                 popup.hide();
@@ -221,6 +241,7 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
                 this.domNode.appendChild(page);
                 this.activeChild = page;
                 this.dispatch("goto");
+                this.options.popup.panIntoView();
             }
         };
         Paging.prototype.next = function () {
@@ -240,7 +261,10 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
         insertFirst: true,
         panMapIfOutOfView: true,
         ani: ol.animation.pan,
-        ani_opts: { duration: 250 }
+        ani_opts: {
+            source: null,
+            duration: 250
+        }
     };
     /**
      * The control formerly known as ol.Overlay.Popup
@@ -253,20 +277,12 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
                 stopEvent: true,
                 insertFirst: (false !== options.insertFirst ? true : options.insertFirst)
             });
-            this.options = mixin(options, DEFAULT_OPTIONS);
+            this.options = defaults(options, DEFAULT_OPTIONS);
             this.postCreate();
         }
         Popup.prototype.postCreate = function () {
             var _this = this;
             var options = this.options;
-            this.ani = options.ani;
-            if (this.ani === undefined) {
-                this.ani = ol.animation.pan;
-            }
-            this.ani_opts = options.ani_opts;
-            if (this.ani_opts === undefined) {
-                this.ani_opts = { 'duration': 250 };
-            }
             var domNode = this.domNode = document.createElement('div');
             domNode.className = 'ol-popup';
             this.setElement(domNode);
@@ -297,9 +313,7 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
             this.setPosition(coord);
             this.content.innerHTML = html;
             this.domNode.classList.remove("hidden");
-            if (this.options.panMapIfOutOfView !== false && !this.isDetached()) {
-                this.panIntoView(coord);
-            }
+            this.panIntoView();
             this.content.scrollTop = 0;
             this.dispatch("show");
             return this;
@@ -327,6 +341,10 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
             return this.domNode.classList.contains(classNames.DETACH);
         };
         Popup.prototype.panIntoView = function (coord) {
+            if (coord === void 0) { coord = this.getPosition(); }
+            if (!this.options.panMapIfOutOfView || this.isDetached()) {
+                return;
+            }
             var popSize = {
                 width: this.getElement().clientWidth + 20,
                 height: this.getElement().clientHeight + 20
@@ -347,9 +365,11 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
             else if (fromBottom < 0) {
                 newPx[1] -= fromBottom;
             }
-            if (this.ani && this.ani_opts) {
-                this.ani_opts.source = center;
-                this.getMap().beforeRender(this.ani(this.ani_opts));
+            var ani = this.options.ani;
+            var ani_opts = this.options.ani_opts;
+            if (ani && ani_opts) {
+                ani_opts.source = center;
+                this.getMap().beforeRender(ani(ani_opts));
             }
             if (newPx[0] !== curPx[0] || newPx[1] !== curPx[1]) {
                 this.getMap().getView().setCenter(this.getMap().getCoordinateFromPixel(newPx));

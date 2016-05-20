@@ -1,5 +1,13 @@
-define(["require", "exports", "openlayers", "../src/ol3-popup"], function (require, exports, ol, Popup) {
+define(["require", "exports", "openlayers", "../src/ol3-popup", "../src/ol3-symbolizer"], function (require, exports, ol, Popup, Symbolizer) {
     "use strict";
+    var sample_content = [
+        'This little piggy went to market',
+        'This little piggy stayed home',
+        'This little piggy had roast beef',
+        'This little piggy had none',
+        'And this little piggy, this wee little piggy, when wee, wee, wee, wee all the way home!',
+    ];
+    var symbolizer = new Symbolizer.Symbolizer();
     var center = ol.proj.transform([-0.92, 52.96], 'EPSG:4326', 'EPSG:3857');
     var mapContainer = document.getElementById("map");
     function run() {
@@ -31,9 +39,10 @@ define(["require", "exports", "openlayers", "../src/ol3-popup"], function (requi
                         popup.unByKey(h2_1);
                         attach_1.off();
                     });
+                    setTimeout(function () { return attach_1.off(); }, 5000);
                 }
                 var div = document.createElement("div");
-                div.innerHTML = "PAGE " + pages;
+                div.innerHTML = "PAGE " + pages + "<br/>" + sample_content[pages % sample_content.length];
                 popup.pages.add(div);
                 popup.pages.goto(0);
             }, 500);
@@ -43,7 +52,10 @@ define(["require", "exports", "openlayers", "../src/ol3-popup"], function (requi
             popup: popup,
             title: "Alt+Click creates markers",
         });
-        new Popup.FeatureCreator({ map: map });
+        new Popup.FeatureCreator({
+            map: map,
+            symbolizer: symbolizer
+        });
     }
     exports.run = run;
 });

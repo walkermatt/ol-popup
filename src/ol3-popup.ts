@@ -14,8 +14,10 @@ let classNames = {
     DETACH: 'detach'
 };
 
-function mixin<A, B>(a: A, b: B): A & B {
-    Object.keys(b).filter(k => typeof a[k] === undefined).forEach(k => a[k] = b[k]);
+function defaults<A, B>(a: A, ...b: B[]): A & B {
+    b.forEach(b => {
+        Object.keys(b).filter(k => typeof a[k] === undefined).forEach(k => a[k] = b[k]);
+    });
     return <A & B>a;
 }
 
@@ -121,7 +123,23 @@ export class FeatureSelector {
 
         map.addInteraction(select);
 
+        map.on("click", event => {
+            console.log("click");
+            let popup = options.popup;
+            let coord = event.coordinate;
+            popup.hide();
+            popup.show(coord, `<label>${this.options.title}</label>`);
+
+            map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {
+                let page = document.createElement('p');
+                page.innerHTML = `Page ${feature.get("id")} ${feature.getGeometryName()}`;
+                popup.pages.add(page);
+            });
+        });
+
         select.on("select", event => {
+            console.log("select");
+            console.log("total selected:", event.selected.length);
             let popup = options.popup;
             let coord = event.mapBrowserEvent.coordinate;
             popup.hide();
@@ -262,6 +280,7 @@ export class Paging {
             this.domNode.appendChild(page);
             this.activeChild = page;
             this.dispatch("goto");
+            this.options.popup.panIntoView();
         }
     }
 
@@ -274,15 +293,14 @@ export class Paging {
     }
 }
 
-
 /**
  * The constructor options 'must' conform
  */
 export interface IPopupOptions extends olx.OverlayOptions {
     insertFirst?: boolean;
     panMapIfOutOfView?: boolean;
-    ani?: any;
-    ani_opts?: any;
+    ani?: (args: any) => ol.PreRenderFunction;
+    ani_opts?: olx.animation.PanOptions;
 };
 
 /**
@@ -292,7 +310,10 @@ const DEFAULT_OPTIONS: IPopupOptions = {
     insertFirst: true,
     panMapIfOutOfView: true,
     ani: ol.animation.pan,
-    ani_opts: { duration: 250 }
+    ani_opts: {
+        source: null,
+        duration: 250
+    }
 }
 
 /**
@@ -300,8 +321,6 @@ const DEFAULT_OPTIONS: IPopupOptions = {
  */
 export class Popup extends ol.Overlay {
     options: IPopupOptions;
-    ani: any;
-    ani_opts: any;
     content: HTMLDivElement;
     domNode: HTMLDivElement;
     closer: HTMLAnchorElement;
@@ -314,22 +333,13 @@ export class Popup extends ol.Overlay {
             insertFirst: (false !== options.insertFirst ? true : options.insertFirst)
         });
 
-        this.options = mixin(options, DEFAULT_OPTIONS);
+        this.options = defaults(options, DEFAULT_OPTIONS);
         this.postCreate();
     }
 
     private postCreate() {
 
         let options = this.options;
-        this.ani = options.ani;
-        if (this.ani === undefined) {
-            this.ani = ol.animation.pan;
-        }
-
-        this.ani_opts = options.ani_opts;
-        if (this.ani_opts === undefined) {
-            this.ani_opts = { 'duration': 250 };
-        }
 
         let domNode = this.domNode = document.createElement('div');
         domNode.className = 'ol-popup';
@@ -363,16 +373,14 @@ export class Popup extends ol.Overlay {
     dispatch(name: string) {
         this["dispatchEvent"](new Event(name));
     }
-    
+
     show(coord: ol.Coordinate, html: string) {
         this.setPosition(coord);
 
         this.content.innerHTML = html;
         this.domNode.classList.remove("hidden");
 
-        if (this.options.panMapIfOutOfView !== false && !this.isDetached()) {
-            this.panIntoView(coord);
-        }
+        this.panIntoView();
         this.content.scrollTop = 0;
         this.dispatch("show");
         return this;
@@ -398,32 +406,36 @@ export class Popup extends ol.Overlay {
         };
 
     }
-    
+
     private isDetached() {
         return this.domNode.classList.contains(classNames.DETACH);
     }
 
-    private panIntoView(coord) {
+    panIntoView(coord = this.getPosition()) {
 
-        var popSize = {
+        if (!this.options.panMapIfOutOfView || this.isDetached()) {
+            return;
+        }
+
+        let popSize = {
             width: this.getElement().clientWidth + 20,
             height: this.getElement().clientHeight + 20
         },
             mapSize = this.getMap().getSize();
 
-        var tailHeight = 20,
+        let tailHeight = 20,
             tailOffsetLeft = 60,
             tailOffsetRight = popSize.width - tailOffsetLeft,
             popOffset = this.getOffset(),
             popPx = this.getMap().getPixelFromCoordinate(coord);
 
-        var fromLeft = (popPx[0] - tailOffsetLeft),
+        let fromLeft = (popPx[0] - tailOffsetLeft),
             fromRight = mapSize[0] - (popPx[0] + tailOffsetRight);
 
-        var fromTop = popPx[1] - popSize.height + popOffset[1],
+        let fromTop = popPx[1] - popSize.height + popOffset[1],
             fromBottom = mapSize[1] - (popPx[1] + tailHeight) - popOffset[1];
 
-        var center = this.getMap().getView().getCenter(),
+        let center = this.getMap().getView().getCenter(),
             curPx = this.getMap().getPixelFromCoordinate(center),
             newPx = curPx.slice();
 
@@ -439,9 +451,11 @@ export class Popup extends ol.Overlay {
             newPx[1] -= fromBottom;
         }
 
-        if (this.ani && this.ani_opts) {
-            this.ani_opts.source = center;
-            this.getMap().beforeRender(this.ani(this.ani_opts));
+        let ani = this.options.ani;
+        let ani_opts = this.options.ani_opts;
+        if (ani && ani_opts) {
+            ani_opts.source = center;
+            this.getMap().beforeRender(ani(ani_opts));
         }
 
         if (newPx[0] !== curPx[0] || newPx[1] !== curPx[1]) {
