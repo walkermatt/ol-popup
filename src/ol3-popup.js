@@ -14,9 +14,30 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
             b[_i - 1] = arguments[_i];
         }
         b.forEach(function (b) {
-            Object.keys(b).filter(function (k) { return typeof a[k] === undefined; }).forEach(function (k) { return a[k] = b[k]; });
+            Object.keys(b).filter(function (k) { return a[k] === undefined; }).forEach(function (k) { return a[k] = b[k]; });
         });
         return a;
+    }
+    function debounce(func, wait, immediate) {
+        var _this = this;
+        if (wait === void 0) { wait = 20; }
+        if (immediate === void 0) { immediate = false; }
+        var timeout;
+        return (function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i - 0] = arguments[_i];
+            }
+            var later = function () {
+                timeout = null;
+                if (!immediate)
+                    func.call(_this, args);
+            }, callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow)
+                func.call(_this, args);
+        });
     }
     var isTouchDevice = function () {
         try {
@@ -98,35 +119,16 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
             var _this = this;
             this.options = options;
             var map = options.map;
-            var select = new ol.interaction.Select({
-                multi: true,
-                condition: function (event) {
-                    return ol.events.condition.singleClick(event) && !ol.events.condition.altKeyOnly(event);
-                }
-            });
-            map.addInteraction(select);
             map.on("click", function (event) {
                 console.log("click");
                 var popup = options.popup;
                 var coord = event.coordinate;
                 popup.hide();
                 popup.show(coord, "<label>" + _this.options.title + "</label>");
+                var pageNum = 1;
                 map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
                     var page = document.createElement('p');
-                    page.innerHTML = "Page " + feature.get("id") + " " + feature.getGeometryName();
-                    popup.pages.add(page);
-                });
-            });
-            select.on("select", function (event) {
-                console.log("select");
-                console.log("total selected:", event.selected.length);
-                var popup = options.popup;
-                var coord = event.mapBrowserEvent.coordinate;
-                popup.hide();
-                popup.show(coord, "<label>" + _this.options.title + "</label>");
-                event.selected.forEach(function (feature, id) {
-                    var page = document.createElement('p');
-                    page.innerHTML = "Page " + (id + 1) + " " + feature.getGeometryName();
+                    page.innerHTML = "Page " + pageNum++ + " " + feature.getGeometryName();
                     popup.pages.add(page);
                 });
                 popup.pages.goto(0);
@@ -263,6 +265,7 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
         ani: ol.animation.pan,
         ani_opts: {
             source: null,
+            start: 0,
             duration: 250
         }
     };
@@ -277,7 +280,7 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
                 stopEvent: true,
                 insertFirst: (false !== options.insertFirst ? true : options.insertFirst)
             });
-            this.options = defaults(options, DEFAULT_OPTIONS);
+            this.options = defaults({}, options, DEFAULT_OPTIONS);
             this.postCreate();
         }
         Popup.prototype.postCreate = function () {
@@ -305,6 +308,7 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
             pageNavigator.hide();
             pageNavigator.on("prev", function () { return pages.prev(); });
             pageNavigator.on("next", function () { return pages.next(); });
+            this.panIntoView = debounce(function () { return _this._panIntoView(); }, 200);
         };
         Popup.prototype.dispatch = function (name) {
             this["dispatchEvent"](new Event(name));
@@ -340,30 +344,36 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
         Popup.prototype.isDetached = function () {
             return this.domNode.classList.contains(classNames.DETACH);
         };
-        Popup.prototype.panIntoView = function (coord) {
-            if (coord === void 0) { coord = this.getPosition(); }
+        // to be replaced with a debounced version
+        Popup.prototype.panIntoView = function () {
+            this._panIntoView();
+        };
+        Popup.prototype._panIntoView = function () {
+            var coord = this.getPosition();
             if (!this.options.panMapIfOutOfView || this.isDetached()) {
                 return;
             }
             var popSize = {
                 width: this.getElement().clientWidth + 20,
                 height: this.getElement().clientHeight + 20
-            }, mapSize = this.getMap().getSize();
-            var tailHeight = 20, tailOffsetLeft = 60, tailOffsetRight = popSize.width - tailOffsetLeft, popOffset = this.getOffset(), popPx = this.getMap().getPixelFromCoordinate(coord);
-            var fromLeft = (popPx[0] - tailOffsetLeft), fromRight = mapSize[0] - (popPx[0] + tailOffsetRight);
-            var fromTop = popPx[1] - popSize.height + popOffset[1], fromBottom = mapSize[1] - (popPx[1] + tailHeight) - popOffset[1];
-            var center = this.getMap().getView().getCenter(), curPx = this.getMap().getPixelFromCoordinate(center), newPx = curPx.slice();
+            }, _a = this.getMap().getSize(), mapx = _a[0], mapy = _a[1];
+            var tailHeight = 20, tailOffsetLeft = 60, tailOffsetRight = popSize.width - tailOffsetLeft, popOffset = this.getOffset(), _b = this.getMap().getPixelFromCoordinate(coord), popx = _b[0], popy = _b[1];
+            var fromLeft = (popx - tailOffsetLeft), fromRight = mapx - (popx + tailOffsetRight);
+            var fromTop = popy - popSize.height + popOffset[1], fromBottom = mapy - (popy + tailHeight) - popOffset[1];
+            if (0 >= Math.max(fromLeft, fromRight, fromTop, fromBottom))
+                return;
+            var center = this.getMap().getView().getCenter(), _c = this.getMap().getPixelFromCoordinate(center), x = _c[0], y = _c[1];
             if (fromRight < 0) {
-                newPx[0] -= fromRight;
+                x -= fromRight;
             }
             else if (fromLeft < 0) {
-                newPx[0] += fromLeft;
+                x += fromLeft;
             }
             if (fromTop < 0) {
-                newPx[1] += fromTop;
+                y += fromTop;
             }
             else if (fromBottom < 0) {
-                newPx[1] -= fromBottom;
+                y -= fromBottom;
             }
             var ani = this.options.ani;
             var ani_opts = this.options.ani_opts;
@@ -371,10 +381,7 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
                 ani_opts.source = center;
                 this.getMap().beforeRender(ani(ani_opts));
             }
-            if (newPx[0] !== curPx[0] || newPx[1] !== curPx[1]) {
-                this.getMap().getView().setCenter(this.getMap().getCoordinateFromPixel(newPx));
-            }
-            return this.getMap().getView().getCenter();
+            this.getMap().getView().setCenter(this.getMap().getCoordinateFromPixel([x, y]));
         };
         return Popup;
     }(ol.Overlay));

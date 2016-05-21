@@ -16,9 +16,24 @@ let classNames = {
 
 function defaults<A, B>(a: A, ...b: B[]): A & B {
     b.forEach(b => {
-        Object.keys(b).filter(k => typeof a[k] === undefined).forEach(k => a[k] = b[k]);
+        Object.keys(b).filter(k => a[k] === undefined).forEach(k => a[k] = b[k]);
     });
     return <A & B>a;
+}
+
+function debounce<T extends Function>(func: T, wait = 20, immediate = false): T {
+    let timeout;
+    return <T><any>((...args: any[]) => {
+        let later = () => {
+            timeout = null;
+            if (!immediate) func.call(this, args);
+        },
+            callNow = immediate && !timeout;
+
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) func.call(this, args);
+    });
 }
 
 let isTouchDevice = () => {
@@ -114,15 +129,6 @@ export class FeatureSelector {
 
         let map = options.map;
 
-        let select = new ol.interaction.Select({
-            multi: true,
-            condition: (event: ol.MapBrowserEvent) =>
-                ol.events.condition.singleClick(event) && !ol.events.condition.altKeyOnly(event)
-
-        });
-
-        map.addInteraction(select);
-
         map.on("click", event => {
             console.log("click");
             let popup = options.popup;
@@ -130,24 +136,10 @@ export class FeatureSelector {
             popup.hide();
             popup.show(coord, `<label>${this.options.title}</label>`);
 
+            let pageNum = 1;
             map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {
                 let page = document.createElement('p');
-                page.innerHTML = `Page ${feature.get("id")} ${feature.getGeometryName()}`;
-                popup.pages.add(page);
-            });
-        });
-
-        select.on("select", event => {
-            console.log("select");
-            console.log("total selected:", event.selected.length);
-            let popup = options.popup;
-            let coord = event.mapBrowserEvent.coordinate;
-            popup.hide();
-            popup.show(coord, `<label>${this.options.title}</label>`);
-
-            event.selected.forEach((feature, id) => {
-                let page = document.createElement('p');
-                page.innerHTML = `Page ${id + 1} ${feature.getGeometryName()}`;
+                page.innerHTML = `Page ${pageNum++} ${feature.getGeometryName()}`;
                 popup.pages.add(page);
             });
 
@@ -312,6 +304,7 @@ const DEFAULT_OPTIONS: IPopupOptions = {
     ani: ol.animation.pan,
     ani_opts: {
         source: null,
+        start: 0,
         duration: 250
     }
 }
@@ -333,7 +326,7 @@ export class Popup extends ol.Overlay {
             insertFirst: (false !== options.insertFirst ? true : options.insertFirst)
         });
 
-        this.options = defaults(options, DEFAULT_OPTIONS);
+        this.options = defaults({}, options, DEFAULT_OPTIONS);
         this.postCreate();
     }
 
@@ -368,6 +361,8 @@ export class Popup extends ol.Overlay {
         pageNavigator.hide();
         pageNavigator.on("prev", () => pages.prev());
         pageNavigator.on("next", () => pages.next());
+
+        this.panIntoView = debounce(() => this._panIntoView(), 200);
     }
 
     dispatch(name: string) {
@@ -411,8 +406,13 @@ export class Popup extends ol.Overlay {
         return this.domNode.classList.contains(classNames.DETACH);
     }
 
-    panIntoView(coord = this.getPosition()) {
+    // to be replaced with a debounced version
+    panIntoView() {
+        this._panIntoView();
+    }
 
+    private _panIntoView() {
+        let coord = this.getPosition();
         if (!this.options.panMapIfOutOfView || this.isDetached()) {
             return;
         }
@@ -421,35 +421,37 @@ export class Popup extends ol.Overlay {
             width: this.getElement().clientWidth + 20,
             height: this.getElement().clientHeight + 20
         },
-            mapSize = this.getMap().getSize();
+            [mapx, mapy] = this.getMap().getSize();
 
         let tailHeight = 20,
             tailOffsetLeft = 60,
             tailOffsetRight = popSize.width - tailOffsetLeft,
             popOffset = this.getOffset(),
-            popPx = this.getMap().getPixelFromCoordinate(coord);
+            [popx, popy] = this.getMap().getPixelFromCoordinate(coord);
 
-        let fromLeft = (popPx[0] - tailOffsetLeft),
-            fromRight = mapSize[0] - (popPx[0] + tailOffsetRight);
+        let fromLeft = (popx - tailOffsetLeft),
+            fromRight = mapx - (popx + tailOffsetRight);
 
-        let fromTop = popPx[1] - popSize.height + popOffset[1],
-            fromBottom = mapSize[1] - (popPx[1] + tailHeight) - popOffset[1];
+        let fromTop = popy - popSize.height + popOffset[1],
+            fromBottom = mapy - (popy + tailHeight) - popOffset[1];
+
+        if (0 >= Math.max(fromLeft, fromRight, fromTop, fromBottom)) return;
 
         let center = this.getMap().getView().getCenter(),
-            curPx = this.getMap().getPixelFromCoordinate(center),
-            newPx = curPx.slice();
+            [x, y] = this.getMap().getPixelFromCoordinate(center);
 
         if (fromRight < 0) {
-            newPx[0] -= fromRight;
+            x -= fromRight;
         } else if (fromLeft < 0) {
-            newPx[0] += fromLeft;
+            x += fromLeft;
         }
 
         if (fromTop < 0) {
-            newPx[1] += fromTop;
+            y += fromTop;
         } else if (fromBottom < 0) {
-            newPx[1] -= fromBottom;
+            y -= fromBottom;
         }
+
 
         let ani = this.options.ani;
         let ani_opts = this.options.ani_opts;
@@ -458,11 +460,7 @@ export class Popup extends ol.Overlay {
             this.getMap().beforeRender(ani(ani_opts));
         }
 
-        if (newPx[0] !== curPx[0] || newPx[1] !== curPx[1]) {
-            this.getMap().getView().setCenter(this.getMap().getCoordinateFromPixel(newPx));
-        }
-
-        return this.getMap().getView().getCenter();
+        this.getMap().getView().setCenter(this.getMap().getCoordinateFromPixel([x, y]));
 
     }
 
