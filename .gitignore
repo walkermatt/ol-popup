@@ -2,7 +2,6 @@
 node_modules
 bower_components
 typings
-*.js
 *.css
 *.d.ts
 *.log
