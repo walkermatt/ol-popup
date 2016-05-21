@@ -1,13 +1,13 @@
-define(["require", "exports", "openlayers", "../src/ol3-popup", "../src/ol3-symbolizer"], function (require, exports, ol, Popup, Symbolizer) {
+define(["require", "exports", "openlayers", "../src/ol3-popup"], function (require, exports, ol, Popup) {
     "use strict";
     var sample_content = [
+        'The story of the three little pigs...',
         'This little piggy went to market',
         'This little piggy stayed home',
         'This little piggy had roast beef',
         'This little piggy had none',
-        'And this little piggy, this wee little piggy, when wee, wee, wee, wee all the way home!',
+        'And this little piggy, <br/>this wee little piggy, <br/>when wee, wee, wee, wee <br/>all the way home!',
     ];
-    var symbolizer = new Symbolizer.Symbolizer();
     var center = ol.proj.transform([-0.92, 52.96], 'EPSG:4326', 'EPSG:3857');
     var mapContainer = document.getElementById("map");
     function run() {
@@ -53,8 +53,7 @@ define(["require", "exports", "openlayers", "../src/ol3-popup", "../src/ol3-symb
             title: "Alt+Click creates markers",
         });
         new Popup.FeatureCreator({
-            map: map,
-            symbolizer: symbolizer
+            map: map
         });
     }
     exports.run = run;

@@ -1,16 +1,14 @@
 import ol = require("openlayers");
 import Popup = require("../src/ol3-popup");
-import Symbolizer = require("../src/ol3-symbolizer");
 
 const sample_content = [
+'The story of the three little pigs...',
 'This little piggy went to market',    
 'This little piggy stayed home',    
 'This little piggy had roast beef',    
 'This little piggy had none',    
-'And this little piggy, this wee little piggy, when wee, wee, wee, wee all the way home!',
+'And this little piggy, <br/>this wee little piggy, <br/>when wee, wee, wee, wee <br/>all the way home!',
 ];
-
-let symbolizer = new Symbolizer.Symbolizer();
 
 let center = ol.proj.transform([-0.92, 52.96], 'EPSG:4326', 'EPSG:3857');
 
@@ -63,8 +61,7 @@ export function run() {
     });
 
     new Popup.FeatureCreator({
-        map: map,
-        symbolizer: symbolizer
+        map: map
     });
 
 }
