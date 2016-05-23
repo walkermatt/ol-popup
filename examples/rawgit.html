@@ -17,19 +17,6 @@
 <body>
     <a href="https://rawgit.com/ca0v/ol3-popup/master/examples/rawgit.html?run=./paging">rawgit</a>
     <div id="map"></div>
-    <script>
-        function getParameterByName(name, url) {
-            if (!url) url = window.location.href;
-            name = name.replace(/[\[\]]/g, "\\$&");
-            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-                results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, " "));
-        }
-        
-        require([getParameterByName("run")], test => test.run());
-    </script>
 </body>
 
 </html>
