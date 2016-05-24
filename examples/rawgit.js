@@ -9,7 +9,6 @@ function getParameterByName(name, url) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 require.config({
-    baseUrl: '../src',
     packages: [
         {
             name: 'openlayers',

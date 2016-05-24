@@ -9,8 +9,6 @@ function getParameterByName(name, url = window.location.href) {
 
 require.config({
 
-    baseUrl: '../src',
-
     packages: [
         {
             name: 'openlayers',
