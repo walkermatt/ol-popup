@@ -1,6 +1,6 @@
 {
   "name": "ol3-popup",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Popup overlay for OpenLayers 3",
   "repository": {
     "type": "git",

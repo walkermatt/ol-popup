@@ -10,6 +10,9 @@
  */
 import ol = require("openlayers");
 
+type SourceType = HTMLElement | string | JQueryDeferred<HTMLElement | string>;
+type SourceCallback = () => SourceType;
+
 let classNames = {
     DETACH: 'detach'
 };
@@ -227,6 +230,7 @@ export class PageNavigator {
 export class Paging {
 
     private _pages: Array<{
+        callback?: SourceCallback;
         element: HTMLElement;
         location: ol.Coordinate;
     }>;
@@ -257,12 +261,60 @@ export class Paging {
         this.domNode.addEventListener(name, listener);
     }
 
-    add(page: HTMLElement, geom?: ol.geom.Geometry) {
-        page.classList.add("page");
-        this._pages.push({
-            element: page,
-            location: geom && getInteriorPoint(geom)
-        });
+    add(source: SourceType | SourceCallback, geom?: ol.geom.Geometry) {
+        if (false) {
+        }
+
+        else if (typeof source === "string") {
+            let page = document.createElement("div");
+            page.innerHTML = source;
+            this._pages.push({
+                element: <HTMLElement>page.firstChild,
+                location: geom && getInteriorPoint(geom)
+            });
+        }
+
+        else if (source["appendChild"]) {
+            let page = <HTMLElement>source;
+            page.classList.add("page");
+            this._pages.push({
+                element: page,
+                location: geom && getInteriorPoint(geom)
+            });
+        }
+
+        else if (source["then"]) {
+            let d = <JQueryDeferred<HTMLElement | string>>source;
+            let page = document.createElement("div");
+            page.classList.add("page");
+            this._pages.push({
+                element: page,
+                location: geom && getInteriorPoint(geom)
+            });
+            $.when(d).then(v => {
+                if (typeof v === "string") {
+                    page.innerHTML = v;
+                } else {
+                    page.appendChild(v);
+                }
+            });
+        }
+
+        else if (typeof source === "function") {
+            // response can be a DOM, string or promise            
+            let page = document.createElement("div");
+            page.classList.add("page");
+            this._pages.push({
+                callback: <SourceCallback>source,
+                element: page,
+                location: geom && getInteriorPoint(geom)
+            });
+        }
+
+        else {
+            throw `invalid source value: ${source}`;
+        }
+
         this.dispatch("add");
     }
 
@@ -282,6 +334,20 @@ export class Paging {
             let activeChild = this._activeIndex >= 0 && this._pages[this._activeIndex];
             if (activeChild) {
                 this.domNode.removeChild(activeChild.element);
+            }
+            if (page.callback) {
+                let refreshedContent = page.callback();
+                $.when(refreshedContent).then(v => {
+                    if (false) {
+                    } else if (typeof v === "string") {
+                        page.element.innerHTML = v;
+                    } else if (typeof v["innerHTML"] !== "undefined") {
+                        page.element.innerHTML = "";
+                        page.element.appendChild(v);
+                    } else {
+                        throw `invalid callback result: ${v}`;
+                    }
+                });
             }
             this.domNode.appendChild(page.element);
             this._activeIndex = index;
