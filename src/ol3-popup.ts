@@ -60,6 +60,11 @@ function enableTouchScroll(elm: HTMLElement) {
     }, false);
 }
 
+function getInteriorPoint(geom: ol.geom.Geometry) {
+    if (geom["getInteriorPoint"]) return (<ol.geom.Point>geom["getInteriorPoint"]()).getCoordinates();
+    return ol.extent.getCenter(geom.getExtent());
+}
+
 /**
  * Used for testing, will create features when Alt+Clicking the map
  */
@@ -140,7 +145,7 @@ export class FeatureSelector {
             map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {
                 let page = document.createElement('p');
                 page.innerHTML = `Page ${pageNum++} ${feature.getGeometryName()}`;
-                popup.pages.add(page);
+                popup.pages.add(page, feature.getGeometry());
             });
 
             popup.pages.goto(0);
@@ -221,8 +226,12 @@ export class PageNavigator {
  */
 export class Paging {
 
-    private _pages: Array<HTMLElement>;
-    private activeChild: HTMLElement;
+    private _pages: Array<{
+        element: HTMLElement;
+        location: ol.Coordinate;
+    }>;
+
+    private _activeIndex: number;
     domNode: HTMLDivElement;
 
     constructor(public options: { popup: Popup }) {
@@ -233,7 +242,7 @@ export class Paging {
     }
 
     get activeIndex() {
-        return this._pages.indexOf(this.activeChild);
+        return this._activeIndex;
     }
 
     get count() {
@@ -248,17 +257,21 @@ export class Paging {
         this.domNode.addEventListener(name, listener);
     }
 
-    add(page: HTMLElement) {
+    add(page: HTMLElement, geom?: ol.geom.Geometry) {
         page.classList.add("page");
-        this._pages.push(page);
+        this._pages.push({
+            element: page,
+            location: geom && getInteriorPoint(geom)
+        });
         this.dispatch("add");
     }
 
     clear() {
+        let activeChild = this._activeIndex >= 0 && this._pages[this._activeIndex];
+        this._activeIndex = -1;
         this._pages = [];
-        if (this.activeChild) {
-            this.domNode.removeChild(this.activeChild);
-            this.activeChild = null;
+        if (activeChild) {
+            this.domNode.removeChild(activeChild.element);
             this.dispatch("clear");
         }
     }
@@ -266,13 +279,17 @@ export class Paging {
     goto(index: number) {
         let page = this._pages[index];
         if (page) {
-            if (this.activeChild) {
-                this.domNode.removeChild(this.activeChild);
+            let activeChild = this._activeIndex >= 0 && this._pages[this._activeIndex];
+            if (activeChild) {
+                this.domNode.removeChild(activeChild.element);
             }
-            this.domNode.appendChild(page);
-            this.activeChild = page;
+            this.domNode.appendChild(page.element);
+            this._activeIndex = index;
+            if (page.location) {
+                this.options.popup.setPosition(page.location);
+                this.options.popup.panIntoView();
+            }
             this.dispatch("goto");
-            this.options.popup.panIntoView();
         }
     }
 

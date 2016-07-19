@@ -62,6 +62,11 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
             this.scrollTop = scrollStartPos - event.touches[0].pageY;
         }, false);
     }
+    function getInteriorPoint(geom) {
+        if (geom["getInteriorPoint"])
+            return geom["getInteriorPoint"]().getCoordinates();
+        return ol.extent.getCenter(geom.getExtent());
+    }
     /**
      * Used for testing, will create features when Alt+Clicking the map
      */
@@ -129,7 +134,7 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
                 map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
                     var page = document.createElement('p');
                     page.innerHTML = "Page " + pageNum++ + " " + feature.getGeometryName();
-                    popup.pages.add(page);
+                    popup.pages.add(page, feature.getGeometry());
                 });
                 popup.pages.goto(0);
             });
@@ -203,7 +208,7 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
         }
         Object.defineProperty(Paging.prototype, "activeIndex", {
             get: function () {
-                return this._pages.indexOf(this.activeChild);
+                return this._activeIndex;
             },
             enumerable: true,
             configurable: true
@@ -221,29 +226,37 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
         Paging.prototype.on = function (name, listener) {
             this.domNode.addEventListener(name, listener);
         };
-        Paging.prototype.add = function (page) {
+        Paging.prototype.add = function (page, geom) {
             page.classList.add("page");
-            this._pages.push(page);
+            this._pages.push({
+                element: page,
+                location: geom && getInteriorPoint(geom)
+            });
             this.dispatch("add");
         };
         Paging.prototype.clear = function () {
+            var activeChild = this._activeIndex >= 0 && this._pages[this._activeIndex];
+            this._activeIndex = -1;
             this._pages = [];
-            if (this.activeChild) {
-                this.domNode.removeChild(this.activeChild);
-                this.activeChild = null;
+            if (activeChild) {
+                this.domNode.removeChild(activeChild.element);
                 this.dispatch("clear");
             }
         };
         Paging.prototype.goto = function (index) {
             var page = this._pages[index];
             if (page) {
-                if (this.activeChild) {
-                    this.domNode.removeChild(this.activeChild);
+                var activeChild = this._activeIndex >= 0 && this._pages[this._activeIndex];
+                if (activeChild) {
+                    this.domNode.removeChild(activeChild.element);
                 }
-                this.domNode.appendChild(page);
-                this.activeChild = page;
+                this.domNode.appendChild(page.element);
+                this._activeIndex = index;
+                if (page.location) {
+                    this.options.popup.setPosition(page.location);
+                    this.options.popup.panIntoView();
+                }
                 this.dispatch("goto");
-                this.options.popup.panIntoView();
             }
         };
         Paging.prototype.next = function () {
