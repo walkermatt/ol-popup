@@ -14,6 +14,11 @@ require.config({
             name: 'openlayers',
             location: 'https://cdnjs.cloudflare.com/ajax/libs/ol3/3.15.1',
             main: 'ol'
+        },
+        {
+            name: 'jquery',
+            location: 'https://code.jquery.com',
+            main: 'jquery-3.1.0.min'
         }
     ],
     callback: function () {
