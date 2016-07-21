@@ -10,7 +10,6 @@
     "files": [
         "./rawgit.ts",
         "./paging.ts",
-        "../src/ol3-popup.ts",
         "../typings/index.d.ts"
     ],
     "exclude": [
