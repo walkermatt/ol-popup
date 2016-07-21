@@ -4,10 +4,14 @@ Adds paging to [ol3-popup](https://github.com/walkermatt/ol3-popup).
 
 ## Examples
 
-The examples demonstrate usage and can be viewed online thanks to [RawGit](http://rawgit.com/):
+* [Paging](https://rawgit.com/ca0v/ol3-popup/master/examples/rawgit.html?run=./paging)
 
-* [Basic usage](https://rawgit.com/ca0v/ol3-popup/master/examples/rawgit.html?run=./paging)
+## Installation
 
-The source for all examples can be found in [examples](examples).
+* `typings install ol3-popup=https://raw.githubusercontent.com/ca0v/ol3-popup/master/index.d.ts --save`
+* `bower install ol3-paging-popup --save`
 
+## Building
 
+* `tsc -p examples/tsconfig-deploy.json`
+* [Paging (dist)](https://rawgit.com/ca0v/ol3-popup/master/dist/dist.html?run=examples/paging)
