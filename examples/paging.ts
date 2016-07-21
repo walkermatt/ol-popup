@@ -1,5 +1,8 @@
 import ol = require("openlayers");
 import Popup = require("../src/ol3-popup");
+import FeatureCreator = require("./feature-creator");
+import FeatureSelector = require("./feature-selector");
+
 import $ = require("jquery");
 
 const sample_content = [
@@ -104,13 +107,13 @@ export function run() {
         }, 200);
     }, 500);
 
-    let selector = new Popup.FeatureSelector({
+    let selector = new FeatureSelector({
         map: map,
         popup: popup,
         title: "Alt+Click creates markers",
     });
 
-    new Popup.FeatureCreator({
+    new FeatureCreator({
         map: map
     });
 

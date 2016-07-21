@@ -1,4 +1,4 @@
-define(["require", "exports", "openlayers", "../src/ol3-popup", "jquery"], function (require, exports, ol, Popup, $) {
+define(["require", "exports", "openlayers", "../src/ol3-popup", "./feature-creator", "./feature-selector", "jquery"], function (require, exports, ol, Popup, FeatureCreator, FeatureSelector, $) {
     "use strict";
     var sample_content = [
         'The story of the three little pigs...',
@@ -88,12 +88,12 @@ define(["require", "exports", "openlayers", "../src/ol3-popup", "jquery"], funct
                 popup.pages.goto(0);
             }, 200);
         }, 500);
-        var selector = new Popup.FeatureSelector({
+        var selector = new FeatureSelector({
             map: map,
             popup: popup,
             title: "Alt+Click creates markers",
         });
-        new Popup.FeatureCreator({
+        new FeatureCreator({
             map: map
         });
     }
