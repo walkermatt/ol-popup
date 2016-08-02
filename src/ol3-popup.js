@@ -3,11 +3,14 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-define(["require", "exports", "openlayers", "./paging/paging", "./paging/page-navigator"], function (require, exports, ol, Paging, PageNavigator) {
+define(["require", "exports", "openlayers", "./paging/paging", "./paging/page-navigator"], function (require, exports, ol, paging_1, PageNavigator) {
     "use strict";
     var classNames = {
         DETACH: 'detach'
     };
+    /**
+     * extends the base object without replacing defined attributes
+     */
     function defaults(a) {
         var b = [];
         for (var _i = 1; _i < arguments.length; _i++) {
@@ -18,6 +21,9 @@ define(["require", "exports", "openlayers", "./paging/paging", "./paging/page-na
         });
         return a;
     }
+    /**
+     * debounce: wait until it hasn't been called for a while before executing the callback
+     */
     function debounce(func, wait, immediate) {
         var _this = this;
         if (wait === void 0) { wait = 20; }
@@ -32,7 +38,8 @@ define(["require", "exports", "openlayers", "./paging/paging", "./paging/page-na
                 timeout = null;
                 if (!immediate)
                     func.call(_this, args);
-            }, callNow = immediate && !timeout;
+            };
+            var callNow = immediate && !timeout;
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
             if (callNow)
@@ -67,14 +74,14 @@ define(["require", "exports", "openlayers", "./paging/paging", "./paging/page-na
      * Default options for the popup control so it can be created without any contructor arguments
      */
     var DEFAULT_OPTIONS = {
+        // determines if this should be the first (or last) element in its container
         insertFirst: true,
-        panMapIfOutOfView: true,
-        ani: ol.animation.pan,
-        ani_opts: {
-            source: null,
-            start: 0,
+        autoPan: true,
+        autoPanAnimation: {
             duration: 250
-        }
+        },
+        positioning: "top-right",
+        stopEvent: true
     };
     /**
      * The control formerly known as ol.Overlay.Popup
@@ -83,11 +90,13 @@ define(["require", "exports", "openlayers", "./paging/paging", "./paging/page-na
         __extends(Popup, _super);
         function Popup(options) {
             if (options === void 0) { options = DEFAULT_OPTIONS; }
-            _super.call(this, {
-                stopEvent: true,
-                insertFirst: (false !== options.insertFirst ? true : options.insertFirst)
-            });
+            /**
+             * overlays have a map, element, offset, position, positioning
+             */
+            _super.call(this, options);
+            // options are captured within the overlay constructor so make them accessible from the outside        
             this.options = defaults({}, options, DEFAULT_OPTIONS);
+            // the internal properties, dom and listeners are in place, time to create the popup
             this.postCreate();
         }
         Popup.prototype.postCreate = function () {
@@ -96,26 +105,29 @@ define(["require", "exports", "openlayers", "./paging/paging", "./paging/page-na
             var domNode = this.domNode = document.createElement('div');
             domNode.className = 'ol-popup';
             this.setElement(domNode);
-            var closer = this.closer = document.createElement('a');
-            closer.className = 'ol-popup-closer';
-            closer.href = '#';
-            domNode.appendChild(closer);
-            closer.addEventListener('click', function (evt) {
-                _this.hide();
-                closer.blur();
-                evt.preventDefault();
-            }, false);
+            {
+                var closer = this.closer = document.createElement('div');
+                closer.className = 'ol-popup-closer';
+                domNode.appendChild(closer);
+                closer.addEventListener('click', function (evt) {
+                    _this.hide();
+                    evt.preventDefault();
+                }, false);
+            }
             var content = this.content = document.createElement('div');
             content.className = 'ol-popup-content';
             this.domNode.appendChild(content);
             // Apply workaround to enable scrolling of content div on touch devices
             isTouchDevice() && enableTouchScroll(content);
-            var pages = this.pages = new Paging({ popup: this });
+            var pages = this.pages = new paging_1.Paging({ popup: this });
             var pageNavigator = new PageNavigator({ pages: pages });
             pageNavigator.hide();
             pageNavigator.on("prev", function () { return pages.prev(); });
             pageNavigator.on("next", function () { return pages.next(); });
-            this.panIntoView = debounce(function () { return _this._panIntoView(); }, 200);
+            {
+                var callback_1 = this.panIntoView_;
+                this.panIntoView_ = debounce(function () { return callback_1.apply(_this); }, 50);
+            }
         };
         Popup.prototype.dispatch = function (name) {
             this["dispatchEvent"](new Event(name));
@@ -124,8 +136,6 @@ define(["require", "exports", "openlayers", "./paging/paging", "./paging/page-na
             this.setPosition(coord);
             this.content.innerHTML = html;
             this.domNode.classList.remove("hidden");
-            this.panIntoView();
-            this.content.scrollTop = 0;
             this.dispatch("show");
             return this;
         };
@@ -150,45 +160,6 @@ define(["require", "exports", "openlayers", "./paging/paging", "./paging/page-na
         };
         Popup.prototype.isDetached = function () {
             return this.domNode.classList.contains(classNames.DETACH);
-        };
-        // to be replaced with a debounced version
-        Popup.prototype.panIntoView = function () {
-            this._panIntoView();
-        };
-        Popup.prototype._panIntoView = function () {
-            var coord = this.getPosition();
-            if (!this.options.panMapIfOutOfView || this.isDetached()) {
-                return;
-            }
-            var popSize = {
-                width: this.getElement().clientWidth + 20,
-                height: this.getElement().clientHeight + 20
-            }, _a = this.getMap().getSize(), mapx = _a[0], mapy = _a[1];
-            var tailHeight = 20, tailOffsetLeft = 60, tailOffsetRight = popSize.width - tailOffsetLeft, popOffset = this.getOffset(), _b = this.getMap().getPixelFromCoordinate(coord), popx = _b[0], popy = _b[1];
-            var fromLeft = (popx - tailOffsetLeft), fromRight = mapx - (popx + tailOffsetRight);
-            var fromTop = popy - popSize.height + popOffset[1], fromBottom = mapy - (popy + tailHeight) - popOffset[1];
-            if (0 >= Math.max(fromLeft, fromRight, fromTop, fromBottom))
-                return;
-            var center = this.getMap().getView().getCenter(), _c = this.getMap().getPixelFromCoordinate(center), x = _c[0], y = _c[1];
-            if (fromRight < 0) {
-                x -= fromRight;
-            }
-            else if (fromLeft < 0) {
-                x += fromLeft;
-            }
-            if (fromTop < 0) {
-                y += fromTop;
-            }
-            else if (fromBottom < 0) {
-                y -= fromBottom;
-            }
-            var ani = this.options.ani;
-            var ani_opts = this.options.ani_opts;
-            if (ani && ani_opts) {
-                ani_opts.source = center;
-                this.getMap().beforeRender(ani(ani_opts));
-            }
-            this.getMap().getView().setCenter(this.getMap().getCoordinateFromPixel([x, y]));
         };
         return Popup;
     }(ol.Overlay));

@@ -1,24 +1,17 @@
 /**
  * OpenLayers 3 Popup Overlay.
- * See [the examples](./examples) for usage. Styling can be done via CSS.
- * @constructor
- * @extends {ol.Overlay}
- * @param {Object} opt_options Overlay options, extends olx.OverlayOptions adding:
- *                              **`panMapIfOutOfView`** `Boolean` - Should the
- *                              map be panned so that the popup is entirely
- *                              within view.
  */
 import ol = require("openlayers");
-import Paging = require("./paging/paging");
+import {Paging} from "./paging/paging";
 import PageNavigator = require("./paging/page-navigator");
-
-export type SourceType = HTMLElement | string | JQueryDeferred<HTMLElement | string>;
-export type SourceCallback = () => SourceType;
 
 let classNames = {
     DETACH: 'detach'
 };
 
+/**
+ * extends the base object without replacing defined attributes
+ */
 function defaults<A, B>(a: A, ...b: B[]): A & B {
     b.forEach(b => {
         Object.keys(b).filter(k => a[k] === undefined).forEach(k => a[k] = b[k]);
@@ -26,14 +19,17 @@ function defaults<A, B>(a: A, ...b: B[]): A & B {
     return <A & B>a;
 }
 
+/**
+ * debounce: wait until it hasn't been called for a while before executing the callback
+ */
 function debounce<T extends Function>(func: T, wait = 20, immediate = false): T {
     let timeout;
     return <T><any>((...args: any[]) => {
         let later = () => {
             timeout = null;
             if (!immediate) func.call(this, args);
-        },
-            callNow = immediate && !timeout;
+        };
+        let callNow = immediate && !timeout;
 
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
@@ -66,49 +62,69 @@ function enableTouchScroll(elm: HTMLElement) {
 }
 
 /**
- * The constructor options 'must' conform
+ * The constructor options 'must' conform, most interesting is autoPan
  */
 export interface IPopupOptions extends olx.OverlayOptions {
+    // calls panIntoView when position changes
+    autoPan?: boolean;
+    // when panning into view, passed to the pan animation to track the 'center'
+    autoPanAnimation?: {
+        // how long should the animation last?
+        duration: number;
+    };
+    // virtually increases the control width & height by this amount when computing new center point
+    autoPanMargin?: number;
+    // determines if this should be the first (or last) element in its container
     insertFirst?: boolean;
-    panMapIfOutOfView?: boolean;
-    ani?: (args: any) => ol.PreRenderFunction;
-    ani_opts?: olx.animation.PanOptions;
+    // determines which container to use, if true then event propagation is stopped meaning mousedown and touchstart events don't reach the map.
+    stopEvent?: boolean;
+    // the pixel offset when computing the rendered position
+    offset?: number[];
+    // one of (bottom|center|top)*(left|center|right), css positioning when updating the rendered position
+    positioning?: string;
+    // the point coordinate for this overlay
+    position?: number[];
 };
 
 /**
- * Default options for the popup control so it can be created without any contructor arguments 
+ * Default options for the popup control so it can be created without any contructor arguments
  */
 const DEFAULT_OPTIONS: IPopupOptions = {
+    // determines if this should be the first (or last) element in its container
     insertFirst: true,
-    panMapIfOutOfView: true,
-    ani: ol.animation.pan,
-    ani_opts: {
-        source: null,
-        start: 0,
+    autoPan: true,
+    autoPanAnimation: {
         duration: 250
-    }
+    },
+    positioning: "top-right", // ol.OverlayPositioning.TOP_RIGHT
+    stopEvent: true
 }
 
 /**
  * The control formerly known as ol.Overlay.Popup 
  */
 export class Popup extends ol.Overlay {
+    panIntoView_: () => void;
     options: IPopupOptions;
     content: HTMLDivElement;
     domNode: HTMLDivElement;
-    closer: HTMLAnchorElement;
+    closer: HTMLDivElement;
     pages: Paging;
 
     constructor(options = DEFAULT_OPTIONS) {
 
-        super({
-            stopEvent: true,
-            insertFirst: (false !== options.insertFirst ? true : options.insertFirst)
-        });
+        /**
+         * overlays have a map, element, offset, position, positioning
+         */
+        super(options);
 
+        // options are captured within the overlay constructor so make them accessible from the outside        
         this.options = defaults({}, options, DEFAULT_OPTIONS);
+
+        // the internal properties, dom and listeners are in place, time to create the popup
         this.postCreate();
     }
+
 
     private postCreate() {
 
@@ -118,16 +134,17 @@ export class Popup extends ol.Overlay {
         domNode.className = 'ol-popup';
         this.setElement(domNode);
 
-        let closer = this.closer = document.createElement('a');
-        closer.className = 'ol-popup-closer';
-        closer.href = '#';
-        domNode.appendChild(closer);
+        {
+            let closer = this.closer = document.createElement('div');
+            closer.className = 'ol-popup-closer';
+            domNode.appendChild(closer);
 
-        closer.addEventListener('click', evt => {
-            this.hide();
-            closer.blur();
-            evt.preventDefault();
-        }, false);
+            closer.addEventListener('click', evt => {
+                this.hide();
+                evt.preventDefault();
+            }, false);
+        }
+
 
         let content = this.content = document.createElement('div');
         content.className = 'ol-popup-content';
@@ -142,21 +159,24 @@ export class Popup extends ol.Overlay {
         pageNavigator.on("prev", () => pages.prev());
         pageNavigator.on("next", () => pages.next());
 
-        this.panIntoView = debounce(() => this._panIntoView(), 200);
+        {
+            let callback = this.panIntoView_;
+            this.panIntoView_ = debounce(() => callback.apply(this), 50);
+        }
     }
 
     dispatch(name: string) {
         this["dispatchEvent"](new Event(name));
     }
 
+
     show(coord: ol.Coordinate, html: string) {
+
         this.setPosition(coord);
 
         this.content.innerHTML = html;
         this.domNode.classList.remove("hidden");
 
-        this.panIntoView();
-        this.content.scrollTop = 0;
         this.dispatch("show");
         return this;
     }
@@ -184,64 +204,6 @@ export class Popup extends ol.Overlay {
 
     private isDetached() {
         return this.domNode.classList.contains(classNames.DETACH);
-    }
-
-    // to be replaced with a debounced version
-    panIntoView() {
-        this._panIntoView();
-    }
-
-    private _panIntoView() {
-        let coord = this.getPosition();
-        if (!this.options.panMapIfOutOfView || this.isDetached()) {
-            return;
-        }
-
-        let popSize = {
-            width: this.getElement().clientWidth + 20,
-            height: this.getElement().clientHeight + 20
-        },
-            [mapx, mapy] = this.getMap().getSize();
-
-        let tailHeight = 20,
-            tailOffsetLeft = 60,
-            tailOffsetRight = popSize.width - tailOffsetLeft,
-            popOffset = this.getOffset(),
-            [popx, popy] = this.getMap().getPixelFromCoordinate(coord);
-
-        let fromLeft = (popx - tailOffsetLeft),
-            fromRight = mapx - (popx + tailOffsetRight);
-
-        let fromTop = popy - popSize.height + popOffset[1],
-            fromBottom = mapy - (popy + tailHeight) - popOffset[1];
-
-        if (0 >= Math.max(fromLeft, fromRight, fromTop, fromBottom)) return;
-
-        let center = this.getMap().getView().getCenter(),
-            [x, y] = this.getMap().getPixelFromCoordinate(center);
-
-        if (fromRight < 0) {
-            x -= fromRight;
-        } else if (fromLeft < 0) {
-            x += fromLeft;
-        }
-
-        if (fromTop < 0) {
-            y += fromTop;
-        } else if (fromBottom < 0) {
-            y -= fromBottom;
-        }
-
-
-        let ani = this.options.ani;
-        let ani_opts = this.options.ani_opts;
-        if (ani && ani_opts) {
-            ani_opts.source = center;
-            this.getMap().beforeRender(ani(ani_opts));
-        }
-
-        this.getMap().getView().setCenter(this.getMap().getCoordinateFromPixel([x, y]));
-
     }
 
 }
