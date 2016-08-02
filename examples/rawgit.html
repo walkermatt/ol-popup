@@ -5,8 +5,30 @@
     <meta charset="utf-8" />
     <title>OpenLayers 3 - Popup</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ol3/3.17.1/ol.css"></link>
-    <link rel="stylesheet" href="../src/ol3-popup.css"></link>
+    <style>
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/ol3/3.17.1/ol.css');
+        @import url('../src/ol3-popup.css');
+        head, body {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        body { 
+            margin-top: 0;
+            /*
+            The autoPan feature incorrectly determines that the overlay is outside the map
+            and pans it by 1px plus the the size of autoPanMargin (100px).
+            Oddly this only happens when using the built version of ol.js and not ol-debug.js!
+            */
+            margin-left: 1px;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js"></script>
     <script>
         (() => {
