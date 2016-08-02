@@ -4,6 +4,9 @@ $color_celeste_approx: #cccccc;
 $gray: gray;
 $black: rgb(16, 16, 16);
 $dark: rgb(128, 128, 128);
+$padding: 4px;
+$small-button: 24px;
+$popup-offset: -50px;
 
 @mixin noselect {
   -webkit-touch-callout: none; /* iOS Safari */
@@ -25,17 +28,14 @@ $dark: rgb(128, 128, 128);
 	width: 0;
 	position: absolute;
 	pointer-events: none;
-	left: 48px;
+	left: 4px - $popup-offset;
 }
 
 .ol-popup {
 	position: absolute;
 	background-color: $white;
-	padding: 15px 25px 15px 15px;
-	border: 1px solid $color_celeste_approx;
-    border-radius: 12px;
 	bottom: 12px;
-	left: -50px;
+	left: $popup-offset;
     
 	&:after {
 		@extend %extend_1;
@@ -76,18 +76,14 @@ $dark: rgb(128, 128, 128);
 		
 	}
 
-	div.infoResult {
-		min-width: 130px;
-		p {
-			padding: 0.1em;
-			margin: 0;
-		}
-	}
-    
     .ol-popup-content {
+        white-space: nowrap;
+        padding-right: 24px;
+        padding-top: $padding;
+        padding-left: $padding;
         min-width: 170px;
-        max-height: 200px;
         overflow-x: auto;
+
         h3 {
             margin: 0.25em 0;
         }
@@ -97,9 +93,7 @@ $dark: rgb(128, 128, 128);
         position: absolute;
         top: 2px;
         right: 2px;
-        font-size: 150%;
         padding: 0 4px;
-        color: $gray;
         text-decoration: none;
         &:after {
             content: "\2716";
@@ -107,28 +101,18 @@ $dark: rgb(128, 128, 128);
     }
 
     .pages {
-
-        .page {
-            color:  $black;
-            min-width: 80px;
-            min-height: 80px;
-            margin: 2px;
-            padding: 2px;
-            border: 1px solid $dark;
-            border-radius: 4px;
-        }
-        
+        max-height: 100px;
+        overflow: auto;
     }
 
     .pagination {
         
-        color:  $black;
+        padding-top: $padding;
         min-width: 170px;
-        margin: 4px;
         
         .arrow {
-            width: 24px;    
-            height: 24px;
+            width: $small-button;    
+            height: $small-button;
         }
 
         .btn-prev::after {
@@ -140,9 +124,9 @@ $dark: rgb(128, 128, 128);
         }
 
         .page-num {
-            color:  $dark;
             text-align: center;   
-            margin: 4px;
+            padding-left: $padding;
+            padding-right: $padding;
             @include noselect;
         }
         
