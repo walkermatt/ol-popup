@@ -1,10 +1,9 @@
 # OpenLayers 3 Popup
-
 Adds paging to [ol3-popup](https://github.com/walkermatt/ol3-popup).
 
 ## Examples
 
-* [Paging](https://rawgit.com/ca0v/ol3-popup/master/examples/rawgit.html?run=./paging)
+* [Paging](https://rawgit.com/ca0v/ol3-popup/master/examples/rawgit.html?run=./paging&debug=1)
 
 ## Installation
 

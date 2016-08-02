@@ -49,11 +49,11 @@ export type SourceCallback = () => SourceType;
   */
 export class Paging {
     options: {
-        popup: Popup.Popup;
+        popup: Popup;
     };
     domNode: HTMLDivElement;
     constructor(options: {
-        popup: Popup.Popup;
+        popup: Popup;
     });
     activeIndex: number;
     count: number;

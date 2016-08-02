@@ -5,12 +5,12 @@
     <meta charset="utf-8" />
     <title>OpenLayers 3 - Popup</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ol3/3.17.1/ol.css"></link>
+    <link rel="stylesheet" href="../bower_components/openlayers/ol.css"></link>
     <link rel="stylesheet" href="../src/ol3-popup.css"></link>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js"></script>
-    <script src="popup.js"></script>
+    <script src="../bower_components/requirejs/require.js"></script>
     <script>
-        (() => {
+        (function() {
+
             function getParameterByName(name, url = window.location.href) {
                 name = name.replace(/[\[\]]/g, "\\$&");
                 var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
@@ -19,29 +19,29 @@
                 if (!results[2]) return '';
                 return decodeURIComponent(results[2].replace(/\+/g, " "));
             }
-
+            
             let debug = getParameterByName("debug") === "1";
 
             require.config({
-
+                
                 packages: [
                     {
                         name: 'openlayers',
-                        location: 'https://cdnjs.cloudflare.com/ajax/libs/ol3/3.17.1',
+                        location: '../bower_components/openlayers',
                         main: debug ? 'ol-debug' : 'ol'
                     },
                     {
                         name: 'jquery',
-                        location: 'https://code.jquery.com',
-                        main: debug ? 'jquery-3.1.0' : 'jquery-3.1.0.min'
+                        location: '../bower_components/jquery',
+                        main: debug ? 'dist/jquery' : 'dist/jquery.min'
                     }
                 ],
-
+                
                 callback: () => {
                     require([getParameterByName("run")], test => test.run());
                 }
-            });
 
+            });
         })();
     </script>
 </head>

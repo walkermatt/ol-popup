@@ -1,21 +1,51 @@
+<!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="utf-8" />
     <title>OpenLayers 3 - Popup</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ol3/3.15.1/ol.css"></link>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ol3/3.17.1/ol.css"></link>
     <link rel="stylesheet" href="../src/ol3-popup.css"></link>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="./rawgit.js"></script>
-    <style>
-        #map {
-            height: 80%;
-        }
-    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js"></script>
+    <script>
+        (() => {
+            function getParameterByName(name, url = window.location.href) {
+                name = name.replace(/[\[\]]/g, "\\$&");
+                var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                    results = regex.exec(url);
+                if (!results) return null;
+                if (!results[2]) return '';
+                return decodeURIComponent(results[2].replace(/\+/g, " "));
+            }
+
+            let debug = getParameterByName("debug") === "1";
+
+            require.config({
+
+                packages: [
+                    {
+                        name: 'openlayers',
+                        location: 'https://cdnjs.cloudflare.com/ajax/libs/ol3/3.17.1',
+                        main: debug ? 'ol-debug' : 'ol'
+                    },
+                    {
+                        name: 'jquery',
+                        location: 'https://code.jquery.com',
+                        main: debug ? 'jquery-3.1.0' : 'jquery-3.1.0.min'
+                    }
+                ],
+
+                callback: () => {
+                    require([getParameterByName("run")], test => test.run());
+                }
+            });
+
+        })();
+    </script>
 </head>
 
 <body>
-    <a href="./rawgit.html?run=./paging">paging</a>
     <div id="map"></div>
 </body>
 

@@ -3,75 +3,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-require.config({
-    packages: [
-        {
-            name: 'openlayers',
-            location: '../bower_components/openlayers',
-            main: 'ol-debug'
-        },
-        {
-            name: 'jquery',
-            location: '../bower_components/jquery',
-            main: 'dist/jquery'
-        },
-    ],
-    callback: function () {
-    }
-});
-define("examples/feature-creator", ["require", "exports", "openlayers"], function (require, exports, ol) {
-    "use strict";
-    /**
-     * Used for testing, will create features when Alt+Clicking the map
-     */
-    var FeatureCreator = (function () {
-        function FeatureCreator(options) {
-            this.options = options;
-            var map = options.map;
-            var vectorSource = new ol.source.Vector({
-                features: []
-            });
-            var vectorLayer = new ol.layer.Vector({
-                source: vectorSource,
-                style: new ol.style.Style({
-                    fill: new ol.style.Fill({
-                        color: 'rgba(255, 255, 255, 0.2)'
-                    }),
-                    stroke: new ol.style.Stroke({
-                        color: '#ffcc33',
-                        width: 2
-                    }),
-                    image: new ol.style.Circle({
-                        radius: 7,
-                        fill: new ol.style.Fill({
-                            color: '#ffcc33'
-                        })
-                    })
-                })
-            });
-            var select = new ol.interaction.Select({
-                condition: function (event) {
-                    return ol.events.condition.click(event) && ol.events.condition.altKeyOnly(event);
-                }
-            });
-            map.addInteraction(select);
-            map.addLayer(vectorLayer);
-            select.on("select", function (event) {
-                event = event["mapBrowserEvent"] || event;
-                var coord = event.coordinate;
-                var geom = new ol.geom.Point(coord);
-                var feature = new ol.Feature({
-                    geometry: geom,
-                    name: "New Feature",
-                    attributes: {}
-                });
-                vectorSource.addFeature(feature);
-            });
-        }
-        return FeatureCreator;
-    }());
-    return FeatureCreator;
-});
 define("src/paging/paging", ["require", "exports", "openlayers"], function (require, exports, ol) {
     "use strict";
     function getInteriorPoint(geom) {
@@ -430,6 +361,59 @@ define("src/ol3-popup", ["require", "exports", "openlayers", "src/paging/paging"
     }(ol.Overlay));
     exports.Popup = Popup;
 });
+define("examples/feature-creator", ["require", "exports", "openlayers"], function (require, exports, ol) {
+    "use strict";
+    /**
+     * Used for testing, will create features when Alt+Clicking the map
+     */
+    var FeatureCreator = (function () {
+        function FeatureCreator(options) {
+            this.options = options;
+            var map = options.map;
+            var vectorSource = new ol.source.Vector({
+                features: []
+            });
+            var vectorLayer = new ol.layer.Vector({
+                source: vectorSource,
+                style: new ol.style.Style({
+                    fill: new ol.style.Fill({
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: '#ffcc33',
+                        width: 2
+                    }),
+                    image: new ol.style.Circle({
+                        radius: 7,
+                        fill: new ol.style.Fill({
+                            color: '#ffcc33'
+                        })
+                    })
+                })
+            });
+            var select = new ol.interaction.Select({
+                condition: function (event) {
+                    return ol.events.condition.click(event) && ol.events.condition.altKeyOnly(event);
+                }
+            });
+            map.addInteraction(select);
+            map.addLayer(vectorLayer);
+            select.on("select", function (event) {
+                event = event["mapBrowserEvent"] || event;
+                var coord = event.coordinate;
+                var geom = new ol.geom.Point(coord);
+                var feature = new ol.Feature({
+                    geometry: geom,
+                    name: "New Feature",
+                    attributes: {}
+                });
+                vectorSource.addFeature(feature);
+            });
+        }
+        return FeatureCreator;
+    }());
+    return FeatureCreator;
+});
 define("examples/feature-selector", ["require", "exports"], function (require, exports) {
     "use strict";
     /**
@@ -566,185 +550,4 @@ define("examples/paging", ["require", "exports", "openlayers", "src/ol3-popup", 
     }
     exports.run = run;
 });
-function getParameterByName(name, url) {
-    if (url === void 0) { url = window.location.href; }
-    name = name.replace(/[\[\]]/g, "\\$&");
-    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"), results = regex.exec(url);
-    if (!results)
-        return null;
-    if (!results[2])
-        return '';
-    return decodeURIComponent(results[2].replace(/\+/g, " "));
-}
-require.config({
-    packages: [
-        {
-            name: 'openlayers',
-            location: 'https://cdnjs.cloudflare.com/ajax/libs/ol3/3.15.1',
-            main: 'ol'
-        },
-        {
-            name: 'jquery',
-            location: 'https://code.jquery.com',
-            main: 'jquery-3.1.0.min'
-        }
-    ],
-    callback: function () {
-        require([getParameterByName("run")], function (test) { return test.run(); });
-    }
-});
-var Symbols = {
-    "Symbols": [
-        {
-            "Icons": [
-                {
-                    "Filters": {
-                        "Filters": [
-                            {
-                                "id": "_dataType",
-                                "Value": "ServiceRequest,serviceRequest"
-                            }
-                        ]
-                    },
-                    "id": "ServiceRequest.png",
-                    "Width": 0,
-                    "Height": 0
-                },
-                {
-                    "Filters": {
-                        "Filters": [
-                            {
-                                "id": "applicationType.code",
-                                "Value": "GISTest"
-                            }
-                        ]
-                    },
-                    "id": "Planning_Application.png",
-                    "Width": 0,
-                    "Height": 0,
-                    "template": "app/templates/civics-infoviewer-template"
-                },
-                {
-                    "Filters": {
-                        "Filters": [
-                            {
-                                "id": "_dataType",
-                                "Value": "businessLicense"
-                            }
-                        ]
-                    },
-                    "id": "License_Application.png",
-                    "Width": 0,
-                    "Height": 0
-                },
-                {
-                    "Filters": {
-                        "Filters": [
-                            {
-                                "id": "_dataType",
-                                "Value": "building"
-                            }
-                        ]
-                    },
-                    "id": "Building_Review.png",
-                    "Width": 0,
-                    "Height": 0
-                },
-                {
-                    "Filters": {
-                        "Filters": [
-                            {
-                                "id": "_dataType",
-                                "Value": "project"
-                            }
-                        ]
-                    },
-                    "id": "Project_Application.png",
-                    "Width": 0,
-                    "Height": 0
-                },
-                {
-                    "Filters": {
-                        "Filters": [
-                            {
-                                "id": "_dataType",
-                                "Value": "use"
-                            }
-                        ]
-                    },
-                    "id": "Use_Application.png",
-                    "Width": 0,
-                    "Height": 0
-                },
-                {
-                    "Filters": {
-                        "Filters": [
-                            {
-                                "id": "_dataType",
-                                "Value": "codeEnforcement"
-                            }
-                        ]
-                    },
-                    "id": "Case.png",
-                    "Width": 0,
-                    "Height": 0
-                },
-                {
-                    "Filters": {
-                        "Filters": [
-                            {
-                                "id": "_dataType",
-                                "Value": "tradeLicense"
-                            }
-                        ]
-                    },
-                    "id": "trade-license",
-                    "type": "style",
-                    "style": "{\r\n    \"type\": \"mixed\",\r\n    \"fill\": {\r\n        \"type\": \"sfs\",\r\n        \"style\": \"solid\",\r\n        \"color\": [0, 197, 0, 0.1]\r\n    },\r\n    \"outline\": {\r\n        \"type\": \"sls\",\r\n        \"style\": \"solid\",\r\n        \"color\": [50, 0, 0, 0.5],\r\n        \"width\": 4\r\n     },\r\n    \"image\": {\r\n        \"type\": \"icon\",\r\n        \"icon\": \"Building_Application.png\"\r\n    }\r\n}",
-                    "Width": 0,
-                    "Height": 0
-                },
-                {
-                    "Filters": {
-                        "Filters": [
-                            {
-                                "id": "type",
-                                "Value": "text,address"
-                            }
-                        ]
-                    },
-                    "id": "text-only-marker",
-                    "type": "style",
-                    "style": "{\"type\":\"circle\",\"radius\":7,\"fill\":{\"color\":[247,96,84]}}",
-                    "Width": 0,
-                    "Height": 0,
-                    "Label": "\u003c%= text %\u003e"
-                }
-            ],
-            "id": "*",
-            "Label": "\u003c%= portalDescription =\u003e",
-            "template": "app/templates/civics-infoviewer-template"
-        },
-        {
-            "Icons": [
-                {
-                    "id": "*",
-                    "type": "style",
-                    "style": "{\"type\":\"sfs\",\"style\":\"solid\",\"color\":[246,0,0,0.5],\"outline\":{\"type\":\"sls\",\"style\":\"solid\",\"color\":[246,103,197],\"width\":1}}",
-                    "Width": 0,
-                    "Height": 0
-                }
-            ],
-            "id": "parcels",
-            "Label": "\u003c%= PROPID %\u003e - \u003c%= PROPNAME %\u003e \u003ch6\u003e\u003c%= Comment %\u003e\u003c/h6\u003e"
-        }
-    ],
-    "IconWidth": 0,
-    "IconHeight": 0
-};
-var Symbolizer = (function () {
-    function Symbolizer() {
-    }
-    return Symbolizer;
-}());
 //# sourceMappingURL=popup.js.map
