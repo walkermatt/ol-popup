@@ -18,7 +18,7 @@
   "scripts": {
     "sass": "node-sass ./ -o ./",
     "tsc": "tsc",
-    "deploy": "tsc -d && node build-typings",
+    "deploy": "tsc --outFile dist/popup.js --declaration --sourceMap",
     "build": "npm run sass & npm run tsc"
   },
   "typescript": {

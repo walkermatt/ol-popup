@@ -3,32 +3,74 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-function getParameterByName(name, url) {
-    if (url === void 0) { url = window.location.href; }
-    name = name.replace(/[\[\]]/g, "\\$&");
-    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"), results = regex.exec(url);
-    if (!results)
-        return null;
-    if (!results[2])
-        return '';
-    return decodeURIComponent(results[2].replace(/\+/g, " "));
-}
 require.config({
     packages: [
         {
             name: 'openlayers',
-            location: 'https://cdnjs.cloudflare.com/ajax/libs/ol3/3.15.1',
-            main: 'ol'
+            location: '../bower_components/openlayers',
+            main: 'ol-debug'
         },
         {
             name: 'jquery',
-            location: 'https://code.jquery.com',
-            main: 'jquery-3.1.0.min'
-        }
+            location: '../bower_components/jquery',
+            main: 'dist/jquery'
+        },
     ],
     callback: function () {
-        require([getParameterByName("run")], function (test) { return test.run(); });
     }
+});
+define("examples/feature-creator", ["require", "exports", "openlayers"], function (require, exports, ol) {
+    "use strict";
+    /**
+     * Used for testing, will create features when Alt+Clicking the map
+     */
+    var FeatureCreator = (function () {
+        function FeatureCreator(options) {
+            this.options = options;
+            var map = options.map;
+            var vectorSource = new ol.source.Vector({
+                features: []
+            });
+            var vectorLayer = new ol.layer.Vector({
+                source: vectorSource,
+                style: new ol.style.Style({
+                    fill: new ol.style.Fill({
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: '#ffcc33',
+                        width: 2
+                    }),
+                    image: new ol.style.Circle({
+                        radius: 7,
+                        fill: new ol.style.Fill({
+                            color: '#ffcc33'
+                        })
+                    })
+                })
+            });
+            var select = new ol.interaction.Select({
+                condition: function (event) {
+                    return ol.events.condition.click(event) && ol.events.condition.altKeyOnly(event);
+                }
+            });
+            map.addInteraction(select);
+            map.addLayer(vectorLayer);
+            select.on("select", function (event) {
+                event = event["mapBrowserEvent"] || event;
+                var coord = event.coordinate;
+                var geom = new ol.geom.Point(coord);
+                var feature = new ol.Feature({
+                    geometry: geom,
+                    name: "New Feature",
+                    attributes: {}
+                });
+                vectorSource.addFeature(feature);
+            });
+        }
+        return FeatureCreator;
+    }());
+    return FeatureCreator;
 });
 define("src/paging/paging", ["require", "exports", "openlayers"], function (require, exports, ol) {
     "use strict";
@@ -156,7 +198,6 @@ define("src/paging/paging", ["require", "exports", "openlayers"], function (requ
                 this._activeIndex = index;
                 if (page.location) {
                     this.options.popup.setPosition(page.location);
-                    this.options.popup.panIntoView();
                 }
                 this.dispatch("goto");
             }
@@ -169,7 +210,7 @@ define("src/paging/paging", ["require", "exports", "openlayers"], function (requ
         };
         return Paging;
     }());
-    return Paging;
+    exports.Paging = Paging;
 });
 define("src/paging/page-navigator", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -227,11 +268,14 @@ define("src/paging/page-navigator", ["require", "exports"], function (require, e
     }());
     return PageNavigator;
 });
-define("src/ol3-popup", ["require", "exports", "openlayers", "src/paging/paging", "src/paging/page-navigator"], function (require, exports, ol, Paging, PageNavigator) {
+define("src/ol3-popup", ["require", "exports", "openlayers", "src/paging/paging", "src/paging/page-navigator"], function (require, exports, ol, paging_1, PageNavigator) {
     "use strict";
     var classNames = {
         DETACH: 'detach'
     };
+    /**
+     * extends the base object without replacing defined attributes
+     */
     function defaults(a) {
         var b = [];
         for (var _i = 1; _i < arguments.length; _i++) {
@@ -242,6 +286,9 @@ define("src/ol3-popup", ["require", "exports", "openlayers", "src/paging/paging"
         });
         return a;
     }
+    /**
+     * debounce: wait until it hasn't been called for a while before executing the callback
+     */
     function debounce(func, wait, immediate) {
         var _this = this;
         if (wait === void 0) { wait = 20; }
@@ -256,7 +303,8 @@ define("src/ol3-popup", ["require", "exports", "openlayers", "src/paging/paging"
                 timeout = null;
                 if (!immediate)
                     func.call(_this, args);
-            }, callNow = immediate && !timeout;
+            };
+            var callNow = immediate && !timeout;
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
             if (callNow)
@@ -291,14 +339,14 @@ define("src/ol3-popup", ["require", "exports", "openlayers", "src/paging/paging"
      * Default options for the popup control so it can be created without any contructor arguments
      */
     var DEFAULT_OPTIONS = {
+        // determines if this should be the first (or last) element in its container
         insertFirst: true,
-        panMapIfOutOfView: true,
-        ani: ol.animation.pan,
-        ani_opts: {
-            source: null,
-            start: 0,
+        autoPan: true,
+        autoPanAnimation: {
             duration: 250
-        }
+        },
+        positioning: "top-right",
+        stopEvent: true
     };
     /**
      * The control formerly known as ol.Overlay.Popup
@@ -307,11 +355,13 @@ define("src/ol3-popup", ["require", "exports", "openlayers", "src/paging/paging"
         __extends(Popup, _super);
         function Popup(options) {
             if (options === void 0) { options = DEFAULT_OPTIONS; }
-            _super.call(this, {
-                stopEvent: true,
-                insertFirst: (false !== options.insertFirst ? true : options.insertFirst)
-            });
+            /**
+             * overlays have a map, element, offset, position, positioning
+             */
+            _super.call(this, options);
+            // options are captured within the overlay constructor so make them accessible from the outside        
             this.options = defaults({}, options, DEFAULT_OPTIONS);
+            // the internal properties, dom and listeners are in place, time to create the popup
             this.postCreate();
         }
         Popup.prototype.postCreate = function () {
@@ -320,26 +370,29 @@ define("src/ol3-popup", ["require", "exports", "openlayers", "src/paging/paging"
             var domNode = this.domNode = document.createElement('div');
             domNode.className = 'ol-popup';
             this.setElement(domNode);
-            var closer = this.closer = document.createElement('a');
-            closer.className = 'ol-popup-closer';
-            closer.href = '#';
-            domNode.appendChild(closer);
-            closer.addEventListener('click', function (evt) {
-                _this.hide();
-                closer.blur();
-                evt.preventDefault();
-            }, false);
+            {
+                var closer = this.closer = document.createElement('button');
+                closer.className = 'ol-popup-closer';
+                domNode.appendChild(closer);
+                closer.addEventListener('click', function (evt) {
+                    _this.hide();
+                    evt.preventDefault();
+                }, false);
+            }
             var content = this.content = document.createElement('div');
             content.className = 'ol-popup-content';
             this.domNode.appendChild(content);
             // Apply workaround to enable scrolling of content div on touch devices
             isTouchDevice() && enableTouchScroll(content);
-            var pages = this.pages = new Paging({ popup: this });
+            var pages = this.pages = new paging_1.Paging({ popup: this });
             var pageNavigator = new PageNavigator({ pages: pages });
             pageNavigator.hide();
             pageNavigator.on("prev", function () { return pages.prev(); });
             pageNavigator.on("next", function () { return pages.next(); });
-            this.panIntoView = debounce(function () { return _this._panIntoView(); }, 200);
+            {
+                var callback_1 = this.panIntoView_;
+                this.panIntoView_ = debounce(function () { return callback_1.apply(_this); }, 50);
+            }
         };
         Popup.prototype.dispatch = function (name) {
             this["dispatchEvent"](new Event(name));
@@ -348,8 +401,6 @@ define("src/ol3-popup", ["require", "exports", "openlayers", "src/paging/paging"
             this.setPosition(coord);
             this.content.innerHTML = html;
             this.domNode.classList.remove("hidden");
-            this.panIntoView();
-            this.content.scrollTop = 0;
             this.dispatch("show");
             return this;
         };
@@ -375,101 +426,9 @@ define("src/ol3-popup", ["require", "exports", "openlayers", "src/paging/paging"
         Popup.prototype.isDetached = function () {
             return this.domNode.classList.contains(classNames.DETACH);
         };
-        // to be replaced with a debounced version
-        Popup.prototype.panIntoView = function () {
-            this._panIntoView();
-        };
-        Popup.prototype._panIntoView = function () {
-            var coord = this.getPosition();
-            if (!this.options.panMapIfOutOfView || this.isDetached()) {
-                return;
-            }
-            var popSize = {
-                width: this.getElement().clientWidth + 20,
-                height: this.getElement().clientHeight + 20
-            }, _a = this.getMap().getSize(), mapx = _a[0], mapy = _a[1];
-            var tailHeight = 20, tailOffsetLeft = 60, tailOffsetRight = popSize.width - tailOffsetLeft, popOffset = this.getOffset(), _b = this.getMap().getPixelFromCoordinate(coord), popx = _b[0], popy = _b[1];
-            var fromLeft = (popx - tailOffsetLeft), fromRight = mapx - (popx + tailOffsetRight);
-            var fromTop = popy - popSize.height + popOffset[1], fromBottom = mapy - (popy + tailHeight) - popOffset[1];
-            if (0 >= Math.max(fromLeft, fromRight, fromTop, fromBottom))
-                return;
-            var center = this.getMap().getView().getCenter(), _c = this.getMap().getPixelFromCoordinate(center), x = _c[0], y = _c[1];
-            if (fromRight < 0) {
-                x -= fromRight;
-            }
-            else if (fromLeft < 0) {
-                x += fromLeft;
-            }
-            if (fromTop < 0) {
-                y += fromTop;
-            }
-            else if (fromBottom < 0) {
-                y -= fromBottom;
-            }
-            var ani = this.options.ani;
-            var ani_opts = this.options.ani_opts;
-            if (ani && ani_opts) {
-                ani_opts.source = center;
-                this.getMap().beforeRender(ani(ani_opts));
-            }
-            this.getMap().getView().setCenter(this.getMap().getCoordinateFromPixel([x, y]));
-        };
         return Popup;
     }(ol.Overlay));
     exports.Popup = Popup;
-});
-define("examples/feature-creator", ["require", "exports", "openlayers"], function (require, exports, ol) {
-    "use strict";
-    /**
-     * Used for testing, will create features when Alt+Clicking the map
-     */
-    var FeatureCreator = (function () {
-        function FeatureCreator(options) {
-            this.options = options;
-            var map = options.map;
-            var vectorSource = new ol.source.Vector({
-                features: []
-            });
-            var vectorLayer = new ol.layer.Vector({
-                source: vectorSource,
-                style: new ol.style.Style({
-                    fill: new ol.style.Fill({
-                        color: 'rgba(255, 255, 255, 0.2)'
-                    }),
-                    stroke: new ol.style.Stroke({
-                        color: '#ffcc33',
-                        width: 2
-                    }),
-                    image: new ol.style.Circle({
-                        radius: 7,
-                        fill: new ol.style.Fill({
-                            color: '#ffcc33'
-                        })
-                    })
-                })
-            });
-            var select = new ol.interaction.Select({
-                condition: function (event) {
-                    return ol.events.condition.click(event) && ol.events.condition.altKeyOnly(event);
-                }
-            });
-            map.addInteraction(select);
-            map.addLayer(vectorLayer);
-            select.on("select", function (event) {
-                event = event["mapBrowserEvent"] || event;
-                var coord = event.coordinate;
-                var geom = new ol.geom.Point(coord);
-                var feature = new ol.Feature({
-                    geometry: geom,
-                    name: "New Feature",
-                    attributes: {}
-                });
-                vectorSource.addFeature(feature);
-            });
-        }
-        return FeatureCreator;
-    }());
-    return FeatureCreator;
 });
 define("examples/feature-selector", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -510,9 +469,9 @@ define("examples/paging", ["require", "exports", "openlayers", "src/ol3-popup", 
         'This little piggy had none',
         'And this little piggy, <br/>this wee little piggy, <br/>when wee, wee, wee, wee <br/>all the way home!',
     ];
+    var center = ol.proj.transform([-0.92, 52.96], 'EPSG:4326', 'EPSG:3857');
+    var mapContainer = document.getElementById("map");
     function run() {
-        var mapContainer = document.getElementById("map");
-        var center = ol.proj.transform([-0.92, 52.96], 'EPSG:4326', 'EPSG:3857');
         var map = new ol.Map({
             target: mapContainer,
             layers: [
@@ -525,7 +484,13 @@ define("examples/paging", ["require", "exports", "openlayers", "src/ol3-popup", 
                 zoom: 6
             })
         });
-        var popup = new Popup.Popup();
+        var popup = new Popup.Popup({
+            autoPan: true,
+            autoPanMargin: 100,
+            autoPanAnimation: {
+                duration: 2000
+            }
+        });
         map.addOverlay(popup);
         popup.on("show", function () { return console.log("show popup"); });
         popup.on("hide", function () { return console.log("hide popup"); });
@@ -576,7 +541,7 @@ define("examples/paging", ["require", "exports", "openlayers", "src/ol3-popup", 
                         popup.pages.add(function () {
                             var d = $.Deferred();
                             var div = document.createElement("div");
-                            var markup = "<p>This function promise resolves to a div element</p><p>Version: " + version++ + "</p>";
+                            var markup = "<p>This function promise resolves to a div element, watch the version change 1 second after visiting this page.</p><p>Version: " + version++ + "</p>";
                             setInterval(function () { return div.innerHTML = markup + "<p>Timestamp: " + new Date().toISOString() + "<p/>"; }, 100);
                             setTimeout(function () { return d.resolve(div); }, 1000);
                             return d;
@@ -601,4 +566,185 @@ define("examples/paging", ["require", "exports", "openlayers", "src/ol3-popup", 
     }
     exports.run = run;
 });
+function getParameterByName(name, url) {
+    if (url === void 0) { url = window.location.href; }
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"), results = regex.exec(url);
+    if (!results)
+        return null;
+    if (!results[2])
+        return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+require.config({
+    packages: [
+        {
+            name: 'openlayers',
+            location: 'https://cdnjs.cloudflare.com/ajax/libs/ol3/3.15.1',
+            main: 'ol'
+        },
+        {
+            name: 'jquery',
+            location: 'https://code.jquery.com',
+            main: 'jquery-3.1.0.min'
+        }
+    ],
+    callback: function () {
+        require([getParameterByName("run")], function (test) { return test.run(); });
+    }
+});
+var Symbols = {
+    "Symbols": [
+        {
+            "Icons": [
+                {
+                    "Filters": {
+                        "Filters": [
+                            {
+                                "id": "_dataType",
+                                "Value": "ServiceRequest,serviceRequest"
+                            }
+                        ]
+                    },
+                    "id": "ServiceRequest.png",
+                    "Width": 0,
+                    "Height": 0
+                },
+                {
+                    "Filters": {
+                        "Filters": [
+                            {
+                                "id": "applicationType.code",
+                                "Value": "GISTest"
+                            }
+                        ]
+                    },
+                    "id": "Planning_Application.png",
+                    "Width": 0,
+                    "Height": 0,
+                    "template": "app/templates/civics-infoviewer-template"
+                },
+                {
+                    "Filters": {
+                        "Filters": [
+                            {
+                                "id": "_dataType",
+                                "Value": "businessLicense"
+                            }
+                        ]
+                    },
+                    "id": "License_Application.png",
+                    "Width": 0,
+                    "Height": 0
+                },
+                {
+                    "Filters": {
+                        "Filters": [
+                            {
+                                "id": "_dataType",
+                                "Value": "building"
+                            }
+                        ]
+                    },
+                    "id": "Building_Review.png",
+                    "Width": 0,
+                    "Height": 0
+                },
+                {
+                    "Filters": {
+                        "Filters": [
+                            {
+                                "id": "_dataType",
+                                "Value": "project"
+                            }
+                        ]
+                    },
+                    "id": "Project_Application.png",
+                    "Width": 0,
+                    "Height": 0
+                },
+                {
+                    "Filters": {
+                        "Filters": [
+                            {
+                                "id": "_dataType",
+                                "Value": "use"
+                            }
+                        ]
+                    },
+                    "id": "Use_Application.png",
+                    "Width": 0,
+                    "Height": 0
+                },
+                {
+                    "Filters": {
+                        "Filters": [
+                            {
+                                "id": "_dataType",
+                                "Value": "codeEnforcement"
+                            }
+                        ]
+                    },
+                    "id": "Case.png",
+                    "Width": 0,
+                    "Height": 0
+                },
+                {
+                    "Filters": {
+                        "Filters": [
+                            {
+                                "id": "_dataType",
+                                "Value": "tradeLicense"
+                            }
+                        ]
+                    },
+                    "id": "trade-license",
+                    "type": "style",
+                    "style": "{\r\n    \"type\": \"mixed\",\r\n    \"fill\": {\r\n        \"type\": \"sfs\",\r\n        \"style\": \"solid\",\r\n        \"color\": [0, 197, 0, 0.1]\r\n    },\r\n    \"outline\": {\r\n        \"type\": \"sls\",\r\n        \"style\": \"solid\",\r\n        \"color\": [50, 0, 0, 0.5],\r\n        \"width\": 4\r\n     },\r\n    \"image\": {\r\n        \"type\": \"icon\",\r\n        \"icon\": \"Building_Application.png\"\r\n    }\r\n}",
+                    "Width": 0,
+                    "Height": 0
+                },
+                {
+                    "Filters": {
+                        "Filters": [
+                            {
+                                "id": "type",
+                                "Value": "text,address"
+                            }
+                        ]
+                    },
+                    "id": "text-only-marker",
+                    "type": "style",
+                    "style": "{\"type\":\"circle\",\"radius\":7,\"fill\":{\"color\":[247,96,84]}}",
+                    "Width": 0,
+                    "Height": 0,
+                    "Label": "\u003c%= text %\u003e"
+                }
+            ],
+            "id": "*",
+            "Label": "\u003c%= portalDescription =\u003e",
+            "template": "app/templates/civics-infoviewer-template"
+        },
+        {
+            "Icons": [
+                {
+                    "id": "*",
+                    "type": "style",
+                    "style": "{\"type\":\"sfs\",\"style\":\"solid\",\"color\":[246,0,0,0.5],\"outline\":{\"type\":\"sls\",\"style\":\"solid\",\"color\":[246,103,197],\"width\":1}}",
+                    "Width": 0,
+                    "Height": 0
+                }
+            ],
+            "id": "parcels",
+            "Label": "\u003c%= PROPID %\u003e - \u003c%= PROPNAME %\u003e \u003ch6\u003e\u003c%= Comment %\u003e\u003c/h6\u003e"
+        }
+    ],
+    "IconWidth": 0,
+    "IconHeight": 0
+};
+var Symbolizer = (function () {
+    function Symbolizer() {
+    }
+    return Symbolizer;
+}());
 //# sourceMappingURL=popup.js.map

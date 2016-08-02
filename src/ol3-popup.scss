@@ -1,12 +1,19 @@
 //colors
-$white: white;
-$color_celeste_approx: #cccccc;
-$gray: gray;
-$black: rgb(16, 16, 16);
-$dark: rgb(128, 128, 128);
+$background-color: white;
 $padding: 4px;
 $small-button: 24px;
 $popup-offset: -50px;
+
+@mixin nobutton {
+    border: none;
+    background: transparent;
+    color: inherit;
+}
+
+@mixin smallbutton {
+    width: $small-button;
+    height: $small-button;
+}
 
 @mixin noselect {
   -webkit-touch-callout: none; /* iOS Safari */
@@ -17,9 +24,6 @@ $popup-offset: -50px;
   user-select: none;           /* Non-prefixed version, currently */
 }
 
-//@extend-elements
-//original selectors
-//.ol-popup:after, .ol-popup:before
 %extend_1 {
 	top: 100%;
 	border: solid transparent;
@@ -33,22 +37,17 @@ $popup-offset: -50px;
 
 .ol-popup {
 	position: absolute;
-	background-color: $white;
+	background-color: $background-color;
 	bottom: 12px;
 	left: $popup-offset;
+    padding: $padding;
+    padding-bottom: 0;
     
 	&:after {
 		@extend %extend_1;
-		border-top-color: $white;
+		border-top-color: $background-color;
 		border-width: 10px;
 		margin-left: -10px;
-	}
-    
-	&:before {
-		@extend %extend_1;
-		border-top-color: $color_celeste_approx;
-		border-width: 11px;
-		margin-left: -11px;
 	}
     
 	&.marker {
@@ -79,24 +78,17 @@ $popup-offset: -50px;
     .ol-popup-content {
         white-space: nowrap;
         padding-right: 24px;
-        padding-top: $padding;
-        padding-left: $padding;
         min-width: 170px;
-        overflow-x: auto;
-
-        h3 {
-            margin: 0.25em 0;
-        }
     }
     
     .ol-popup-closer {
+        @include nobutton;
         position: absolute;
-        top: 2px;
-        right: 2px;
-        padding: 0 4px;
+        top: 0;
+        right: 0;
         text-decoration: none;
         &:after {
-            content: "\2716";
+            content: "✖";
         }
     }
 
@@ -111,8 +103,8 @@ $popup-offset: -50px;
         min-width: 170px;
         
         .arrow {
-            width: $small-button;    
-            height: $small-button;
+            @include smallbutton;
+            @include nobutton;
         }
 
         .btn-prev::after {

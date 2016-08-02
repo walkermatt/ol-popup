@@ -108,7 +108,7 @@ export class Popup extends ol.Overlay {
     options: IPopupOptions;
     content: HTMLDivElement;
     domNode: HTMLDivElement;
-    closer: HTMLDivElement;
+    closer: HTMLButtonElement;
     pages: Paging;
 
     constructor(options = DEFAULT_OPTIONS) {
@@ -135,7 +135,7 @@ export class Popup extends ol.Overlay {
         this.setElement(domNode);
 
         {
-            let closer = this.closer = document.createElement('div');
+            let closer = this.closer = document.createElement('button');
             closer.className = 'ol-popup-closer';
             domNode.appendChild(closer);
 

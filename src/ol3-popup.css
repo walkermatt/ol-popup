@@ -1,5 +1,5 @@
 @charset "UTF-8";
-.ol-popup:after, .ol-popup:before {
+.ol-popup:after {
   top: 100%;
   border: solid transparent;
   content: " ";
@@ -13,17 +13,14 @@
   position: absolute;
   background-color: white;
   bottom: 12px;
-  left: -50px; }
+  left: -50px;
+  padding: 4px;
+  padding-bottom: 0; }
 
 .ol-popup:after {
   border-top-color: white;
   border-width: 10px;
   margin-left: -10px; }
-
-.ol-popup:before {
-  border-top-color: #cccccc;
-  border-width: 11px;
-  margin-left: -11px; }
 
 .ol-popup.marker {
   margin-bottom: 30px; }
@@ -46,23 +43,19 @@
 .ol-popup .ol-popup-content {
   white-space: nowrap;
   padding-right: 24px;
-  padding-top: 4px;
-  padding-left: 4px;
-  min-width: 170px;
-  overflow-x: auto; }
-
-.ol-popup .ol-popup-content h3 {
-  margin: 0.25em 0; }
+  min-width: 170px; }
 
 .ol-popup .ol-popup-closer {
+  border: none;
+  background: transparent;
+  color: inherit;
   position: absolute;
-  top: 2px;
-  right: 2px;
-  padding: 0 4px;
+  top: 0;
+  right: 0;
   text-decoration: none; }
 
 .ol-popup .ol-popup-closer:after {
-  content: "\2716"; }
+  content: "✖"; }
 
 .ol-popup .pages {
   max-height: 100px;
@@ -74,7 +67,10 @@
 
 .ol-popup .pagination .arrow {
   width: 24px;
-  height: 24px; }
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: inherit; }
 
 .ol-popup .pagination .btn-prev::after {
   content: "⇦"; }

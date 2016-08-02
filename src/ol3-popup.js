@@ -106,7 +106,7 @@ define(["require", "exports", "openlayers", "./paging/paging", "./paging/page-na
             domNode.className = 'ol-popup';
             this.setElement(domNode);
             {
-                var closer = this.closer = document.createElement('div');
+                var closer = this.closer = document.createElement('button');
                 closer.className = 'ol-popup-closer';
                 domNode.appendChild(closer);
                 closer.addEventListener('click', function (evt) {
