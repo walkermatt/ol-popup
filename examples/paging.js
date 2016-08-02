@@ -23,7 +23,13 @@ define(["require", "exports", "openlayers", "../src/ol3-popup", "./feature-creat
                 zoom: 6
             })
         });
-        var popup = new Popup.Popup();
+        var popup = new Popup.Popup({
+            autoPan: true,
+            autoPanMargin: 100,
+            autoPanAnimation: {
+                duration: 2000
+            }
+        });
         map.addOverlay(popup);
         popup.on("show", function () { return console.log("show popup"); });
         popup.on("hide", function () { return console.log("hide popup"); });
@@ -74,7 +80,7 @@ define(["require", "exports", "openlayers", "../src/ol3-popup", "./feature-creat
                         popup.pages.add(function () {
                             var d = $.Deferred();
                             var div = document.createElement("div");
-                            var markup = "<p>This function promise resolves to a div element</p><p>Version: " + version++ + "</p>";
+                            var markup = "<p>This function promise resolves to a div element, watch the version change 1 second after visiting this page.</p><p>Version: " + version++ + "</p>";
                             setInterval(function () { return div.innerHTML = markup + "<p>Timestamp: " + new Date().toISOString() + "<p/>"; }, 100);
                             setTimeout(function () { return d.resolve(div); }, 1000);
                             return d;
