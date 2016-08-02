@@ -6,13 +6,16 @@ function getInteriorPoint(geom: ol.geom.Geometry) {
     return ol.extent.getCenter(geom.getExtent());
 }
 
+export type SourceType = HTMLElement | string | JQueryDeferred<HTMLElement | string>;
+export type SourceCallback = () => SourceType;
+
 /**
  * Collection of "pages"
  */
-class Paging {
+export class Paging {
 
     private _pages: Array<{
-        callback?: Popup.SourceCallback;
+        callback?: SourceCallback;
         element: HTMLElement;
         location: ol.Coordinate;
     }>;
@@ -43,7 +46,7 @@ class Paging {
         this.domNode.addEventListener(name, listener);
     }
 
-    add(source: Popup.SourceType | Popup.SourceCallback, geom?: ol.geom.Geometry) {
+    add(source: SourceType | SourceCallback, geom?: ol.geom.Geometry) {
         if (false) {
         }
 
@@ -87,7 +90,7 @@ class Paging {
             let page = document.createElement("div");
             page.classList.add("page");
             this._pages.push({
-                callback: <Popup.SourceCallback>source,
+                callback: <SourceCallback>source,
                 element: page,
                 location: geom && getInteriorPoint(geom)
             });
@@ -135,7 +138,6 @@ class Paging {
             this._activeIndex = index;
             if (page.location) {
                 this.options.popup.setPosition(page.location);
-                this.options.popup.panIntoView();
             }
             this.dispatch("goto");
         }
@@ -149,5 +151,3 @@ class Paging {
         (0 < this.activeIndex) && this.goto(this.activeIndex - 1);
     }
 }
-
-export = Paging;

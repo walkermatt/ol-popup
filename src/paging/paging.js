@@ -124,7 +124,6 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
                 this._activeIndex = index;
                 if (page.location) {
                     this.options.popup.setPosition(page.location);
-                    this.options.popup.panIntoView();
                 }
                 this.dispatch("goto");
             }
@@ -137,5 +136,5 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
         };
         return Paging;
     }());
-    return Paging;
+    exports.Paging = Paging;
 });

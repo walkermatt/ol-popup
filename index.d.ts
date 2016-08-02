@@ -14,8 +14,6 @@ import ol = require("openlayers");
     *                              map be panned so that the popup is entirely
     *                              within view.
     */
-export type SourceType = HTMLElement | string | JQueryDeferred<HTMLElement | string>;
-export type SourceCallback = () => SourceType;
 /**
     * The constructor options 'must' conform
     */
@@ -44,10 +42,12 @@ export class Popup extends ol.Overlay {
         panIntoView(): void;
 }
 
+export type SourceType = HTMLElement | string | JQueryDeferred<HTMLElement | string>;
+export type SourceCallback = () => SourceType;
 /**
   * Collection of "pages"
   */
-class Paging {
+export class Paging {
     options: {
         popup: Popup.Popup;
     };
@@ -59,11 +59,10 @@ class Paging {
     count: number;
     dispatch(name: string): void;
     on(name: string, listener: EventListener): void;
-    add(source: Popup.SourceType | Popup.SourceCallback, geom?: ol.geom.Geometry): void;
+    add(source: SourceType | SourceCallback, geom?: ol.geom.Geometry): void;
     clear(): void;
     goto(index: number): void;
     next(): void;
     prev(): void;
 }
-export = Paging;
 
