@@ -28,14 +28,10 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
                     })
                 })
             });
-            var select = new ol.interaction.Select({
-                condition: function (event) {
-                    return ol.events.condition.click(event) && ol.events.condition.altKeyOnly(event);
-                }
-            });
-            map.addInteraction(select);
             map.addLayer(vectorLayer);
-            select.on("select", function (event) {
+            map.on("click", function (event) {
+                if (!ol.events.condition.altKeyOnly(event))
+                    return;
                 event = event["mapBrowserEvent"] || event;
                 var coord = event.coordinate;
                 var geom = new ol.geom.Point(coord);
