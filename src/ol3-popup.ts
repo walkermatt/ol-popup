@@ -2,6 +2,7 @@
  * OpenLayers 3 Popup Overlay.
  */
 import ol = require("openlayers");
+
 import {Paging} from "./paging/paging";
 import PageNavigator = require("./paging/page-navigator");
 
@@ -104,7 +105,6 @@ const DEFAULT_OPTIONS: IPopupOptions = {
  * The control formerly known as ol.Overlay.Popup 
  */
 export class Popup extends ol.Overlay {
-    panIntoView_: () => void;
     options: IPopupOptions;
     content: HTMLDivElement;
     domNode: HTMLDivElement;
@@ -160,9 +160,10 @@ export class Popup extends ol.Overlay {
         pageNavigator.on("next", () => pages.next());
 
         {
-            let callback = this.panIntoView_;
-            this.panIntoView_ = debounce(() => callback.apply(this), 50);
+            let callback = this.setPosition;
+            this.setPosition = debounce(args => callback.apply(this, args), 50);
         }
+        
     }
 
     dispatch(name: string) {
@@ -171,12 +172,9 @@ export class Popup extends ol.Overlay {
 
 
     show(coord: ol.Coordinate, html: string) {
-
         this.setPosition(coord);
-
         this.content.innerHTML = html;
         this.domNode.classList.remove("hidden");
-
         this.dispatch("show");
         return this;
     }

@@ -125,8 +125,8 @@ define(["require", "exports", "openlayers", "./paging/paging", "./paging/page-na
             pageNavigator.on("prev", function () { return pages.prev(); });
             pageNavigator.on("next", function () { return pages.next(); });
             {
-                var callback_1 = this.panIntoView_;
-                this.panIntoView_ = debounce(function () { return callback_1.apply(_this); }, 50);
+                var callback_1 = this.setPosition;
+                this.setPosition = debounce(function (args) { return callback_1.apply(_this, args); }, 50);
             }
         };
         Popup.prototype.dispatch = function (name) {
