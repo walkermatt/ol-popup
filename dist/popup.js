@@ -321,18 +321,18 @@ define("src/ol3-popup", ["require", "exports", "openlayers", "src/paging/paging"
             pageNavigator.on("prev", function () { return pages.prev(); });
             pageNavigator.on("next", function () { return pages.next(); });
             {
-                var callback_1 = this.panIntoView_;
-                this.panIntoView_ = debounce(function () { return callback_1.apply(_this); }, 50);
+                var callback_1 = this.setPosition;
+                this.setPosition = debounce(function (args) { return callback_1.apply(_this, args); }, 50);
             }
         };
         Popup.prototype.dispatch = function (name) {
             this["dispatchEvent"](new Event(name));
         };
         Popup.prototype.show = function (coord, html) {
-            this.setPosition(coord);
             this.content.innerHTML = html;
             this.domNode.classList.remove("hidden");
             this.dispatch("show");
+            this.setPosition(coord);
             return this;
         };
         Popup.prototype.hide = function () {
@@ -391,14 +391,10 @@ define("examples/feature-creator", ["require", "exports", "openlayers"], functio
                     })
                 })
             });
-            var select = new ol.interaction.Select({
-                condition: function (event) {
-                    return ol.events.condition.click(event) && ol.events.condition.altKeyOnly(event);
-                }
-            });
-            map.addInteraction(select);
             map.addLayer(vectorLayer);
-            select.on("select", function (event) {
+            map.on("click", function (event) {
+                if (!ol.events.condition.altKeyOnly(event))
+                    return;
                 event = event["mapBrowserEvent"] || event;
                 var coord = event.coordinate;
                 var geom = new ol.geom.Point(coord);
@@ -424,14 +420,21 @@ define("examples/feature-selector", ["require", "exports"], function (require, e
             var _this = this;
             this.options = options;
             var map = options.map;
-            map.on("click", function (event) {
-                console.log("click");
+            var select = new ol.interaction.Select({
+                multi: true,
+                condition: function (event) {
+                    var result = ol.events.condition.click(event) && !ol.events.condition.altKeyOnly(event);
+                    return result;
+                }
+            });
+            map.addInteraction(select);
+            select.on("select", function (event) {
+                // it is not possible to be notified when no features are selected!
                 var popup = options.popup;
-                var coord = event.coordinate;
-                popup.hide();
-                popup.show(coord, "<label>" + _this.options.title + "</label>");
+                popup.pages.clear();
+                popup.show(event.coordinate, "<label>" + _this.options.title + "</label>");
                 var pageNum = 1;
-                map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
+                event.selected.forEach(function (feature) {
                     var page = document.createElement('p');
                     page.innerHTML = "Page " + pageNum++ + " " + feature.getGeometryName();
                     popup.pages.add(page, feature.getGeometry());
@@ -542,7 +545,7 @@ define("examples/paging", ["require", "exports", "openlayers", "src/ol3-popup", 
         var selector = new FeatureSelector({
             map: map,
             popup: popup,
-            title: "Alt+Click creates markers",
+            title: "Alt+Click creates markers"
         });
         new FeatureCreator({
             map: map

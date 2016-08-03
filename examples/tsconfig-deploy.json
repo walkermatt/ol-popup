@@ -8,7 +8,6 @@
         "outFile": "../dist/popup.js"
     },
     "files": [
-        "./rawgit.ts",
         "./paging.ts",
         "../typings/index.d.ts"
     ],
