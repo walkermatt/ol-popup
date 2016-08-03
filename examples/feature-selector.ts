@@ -1,3 +1,4 @@
+import ol = require("openlayers");
 import Popup = require("../src/ol3-popup");
 
 /**

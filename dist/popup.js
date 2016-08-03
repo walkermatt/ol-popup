@@ -329,10 +329,10 @@ define("src/ol3-popup", ["require", "exports", "openlayers", "src/paging/paging"
             this["dispatchEvent"](new Event(name));
         };
         Popup.prototype.show = function (coord, html) {
+            this.setPosition(coord);
             this.content.innerHTML = html;
             this.domNode.classList.remove("hidden");
             this.dispatch("show");
-            this.setPosition(coord);
             return this;
         };
         Popup.prototype.hide = function () {
@@ -420,21 +420,14 @@ define("examples/feature-selector", ["require", "exports"], function (require, e
             var _this = this;
             this.options = options;
             var map = options.map;
-            var select = new ol.interaction.Select({
-                multi: true,
-                condition: function (event) {
-                    var result = ol.events.condition.click(event) && !ol.events.condition.altKeyOnly(event);
-                    return result;
-                }
-            });
-            map.addInteraction(select);
-            select.on("select", function (event) {
-                // it is not possible to be notified when no features are selected!
+            map.on("click", function (event) {
+                console.log("click");
                 var popup = options.popup;
-                popup.pages.clear();
-                popup.show(event.coordinate, "<label>" + _this.options.title + "</label>");
+                var coord = event.coordinate;
+                popup.hide();
+                popup.show(coord, "<label>" + _this.options.title + "</label>");
                 var pageNum = 1;
-                event.selected.forEach(function (feature) {
+                map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
                     var page = document.createElement('p');
                     page.innerHTML = "Page " + pageNum++ + " " + feature.getGeometryName();
                     popup.pages.add(page, feature.getGeometry());
@@ -545,7 +538,7 @@ define("examples/paging", ["require", "exports", "openlayers", "src/ol3-popup", 
         var selector = new FeatureSelector({
             map: map,
             popup: popup,
-            title: "Alt+Click creates markers"
+            title: "Alt+Click creates markers",
         });
         new FeatureCreator({
             map: map
