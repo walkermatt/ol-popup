@@ -1,13 +1,24 @@
 /**
  * OpenLayers 3 Popup Overlay.
+ * Adopted from http://openlayers.org/en/latest/examples/popup.html?q=overlay
  */
 import ol = require("openlayers");
 
 import {Paging} from "./paging/paging";
 import PageNavigator = require("./paging/page-navigator");
 
-let classNames = {
-    DETACH: 'detach'
+const classNames = {
+    DETACH: 'detach',
+    olPopup: 'ol-popup',
+    olPopupCloser: 'ol-popup-closer',
+    olPopupContent: 'ol-popup-content'
+};
+
+const eventNames = {
+    show: "show",
+    hide: "hide",
+    next: "next-page",
+
 };
 
 /**
@@ -102,9 +113,20 @@ const DEFAULT_OPTIONS: IPopupOptions = {
 }
 
 /**
+ * This is the contract that will not break between versions
+ */
+export interface IPopup_2_0_4<T> {
+    show(position: ol.Coordinate, markup: string): T;
+    hide(): T;
+}
+
+export interface IPopup extends IPopup_2_0_4<Popup> { 
+}
+    
+/**
  * The control formerly known as ol.Overlay.Popup 
  */
-export class Popup extends ol.Overlay {
+export class Popup extends ol.Overlay implements IPopup {
     options: IPopupOptions;
     content: HTMLDivElement;
     domNode: HTMLDivElement;
@@ -131,12 +153,12 @@ export class Popup extends ol.Overlay {
         let options = this.options;
 
         let domNode = this.domNode = document.createElement('div');
-        domNode.className = 'ol-popup';
+        domNode.className = classNames.olPopup;
         this.setElement(domNode);
 
         {
             let closer = this.closer = document.createElement('button');
-            closer.className = 'ol-popup-closer';
+            closer.className = classNames.olPopupCloser;
             domNode.appendChild(closer);
 
             closer.addEventListener('click', evt => {
@@ -145,44 +167,44 @@ export class Popup extends ol.Overlay {
             }, false);
         }
 
+        {
+            let content = this.content = document.createElement('div');
+            content.className = classNames.olPopupContent;
+            this.domNode.appendChild(content);
+            // Apply workaround to enable scrolling of content div on touch devices
+            isTouchDevice() && enableTouchScroll(content);
+        }
 
-        let content = this.content = document.createElement('div');
-        content.className = 'ol-popup-content';
-        this.domNode.appendChild(content);
-
-        // Apply workaround to enable scrolling of content div on touch devices
-        isTouchDevice() && enableTouchScroll(content);
-
-        let pages = this.pages = new Paging({ popup: this });
-        let pageNavigator = new PageNavigator({ pages: pages });
-        pageNavigator.hide();
-        pageNavigator.on("prev", () => pages.prev());
-        pageNavigator.on("next", () => pages.next());
+        {
+            let pages = this.pages = new Paging({ popup: this });
+            let pageNavigator = new PageNavigator({ pages: pages });
+            pageNavigator.hide();
+            pageNavigator.on("prev", () => pages.prev());
+            pageNavigator.on("next", () => pages.next());
+        }
 
         {
             let callback = this.setPosition;
             this.setPosition = debounce(args => callback.apply(this, args), 50);
         }
-        
+
     }
 
     dispatch(name: string) {
         this["dispatchEvent"](new Event(name));
     }
 
-
     show(coord: ol.Coordinate, html: string) {
         this.setPosition(coord);
         this.content.innerHTML = html;
-        this.domNode.classList.remove("hidden");
-        this.dispatch("show");
+        this.dispatch(eventNames.show);
         return this;
     }
 
     hide() {
-        this.domNode.classList.add("hidden");
+        this.setPosition(undefined);
         this.pages.clear();
-        this.dispatch("hide");
+        this.dispatch(eventNames.hide);
         return this;
     }
 

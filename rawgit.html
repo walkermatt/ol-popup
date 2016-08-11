@@ -7,7 +7,7 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <style>
         @import url('https://cdnjs.cloudflare.com/ajax/libs/ol3/3.17.1/ol.css');
-        @import url('../src/ol3-popup.css');
+        @import url('./built/css/ol3-popup.css');
         head, body {
             position: absolute;
             top: 0;
@@ -58,8 +58,10 @@
                     }
                 ],
 
+                deps: ["built/run"],
+
                 callback: () => {
-                    require([getParameterByName("run")], test => test.run());
+                    require([getParameterByName("run") || "examples/index"], test => test.run());
                 }
             });
 

@@ -1,7 +1,7 @@
 import ol = require("openlayers");
-import Popup = require("../src/ol3-popup");
-import FeatureCreator = require("./feature-creator");
-import FeatureSelector = require("./feature-selector");
+import Popup = require("../ol3-popup");
+import FeatureCreator = require("./extras/feature-creator");
+import FeatureSelector = require("./extras/feature-selector");
 
 import $ = require("jquery");
 

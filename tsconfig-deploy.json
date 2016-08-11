@@ -5,11 +5,11 @@
         "declaration": false,
         "noImplicitAny": false,
         "sourceMap": true,
-        "outFile": "../dist/popup.js"
+        "outFile": "./built/popup.js"
     },
     "files": [
-        "./paging.ts",
-        "../typings/index.d.ts"
+        "./src/ol3-popup.ts",
+        "./typings/index.d.ts"
     ],
     "exclude": [
     ]

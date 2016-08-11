@@ -16,18 +16,13 @@
     "url": "https://github.com/ca0v/ol3-popup/issues"
   },
   "scripts": {
-    "sass": "node-sass ./ -o ./",
+    "sass": "node-sass src/css -o built/css",
     "tsc": "tsc",
-    "deploy": "tsc --outFile dist/popup.js --declaration --sourceMap",
+    "deploy": "tsc -p tsconfig-deploy.json",    
     "build": "npm run sass & npm run tsc"
   },
   "typescript": {
     "definition": "index.d.ts"
-  },
-  "dependencies": {
-    "openlayers": "~3.15.0"
-  },
-  "devDependencies": {
-    "dts-bundle": "^0.5.0"
   }
+
 }

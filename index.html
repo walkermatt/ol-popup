@@ -6,9 +6,10 @@
     <title>OpenLayers 3 - Popup</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <style>
-        @import url('../bower_components/openlayers/ol.css');
-        @import url('../src/ol3-popup.css');
-        head, body {
+        @import url('./bower_components/openlayers/ol.css');
+        @import url('./built/css/ol3-popup.css');
+        head,
+        body {
             width: 100%;
             height: 100%;
             /*
@@ -16,12 +17,13 @@
             */
             margin: 0;
         }
+        
         #map {
             width: 100%;
             height: 100%;
         }
     </style>
-    <script src="../bower_components/requirejs/require.js"></script>
+    <script src="./bower_components/requirejs/require.js"></script>
     <script>
         (function() {
 
@@ -41,18 +43,20 @@
                 packages: [
                     {
                         name: 'openlayers',
-                        location: '../bower_components/openlayers',
+                        location: './bower_components/openlayers',
                         main: debug ? 'ol-debug' : 'ol'
                     },
                     {
                         name: 'jquery',
-                        location: '../bower_components/jquery',
+                        location: './bower_components/jquery',
                         main: debug ? 'dist/jquery' : 'dist/jquery.min'
                     }
                 ],
                 
+                deps: ["built/run"],
+
                 callback: () => {
-                    require([getParameterByName("run")], test => test.run());
+                    require([getParameterByName("run") || "examples/index"], test => test.run());
                 }
 
             });

@@ -3,7 +3,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-define("src/paging/paging", ["require", "exports", "openlayers"], function (require, exports, ol) {
+define("paging/paging", ["require", "exports", "openlayers"], function (require, exports, ol) {
     "use strict";
     function getInteriorPoint(geom) {
         if (geom["getInteriorPoint"])
@@ -143,7 +143,7 @@ define("src/paging/paging", ["require", "exports", "openlayers"], function (requ
     }());
     exports.Paging = Paging;
 });
-define("src/paging/page-navigator", ["require", "exports"], function (require, exports) {
+define("paging/page-navigator", ["require", "exports"], function (require, exports) {
     "use strict";
     /**
      * The prior + next paging buttons and current page indicator
@@ -199,10 +199,18 @@ define("src/paging/page-navigator", ["require", "exports"], function (require, e
     }());
     return PageNavigator;
 });
-define("src/ol3-popup", ["require", "exports", "openlayers", "src/paging/paging", "src/paging/page-navigator"], function (require, exports, ol, paging_1, PageNavigator) {
+define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "paging/page-navigator"], function (require, exports, ol, paging_1, PageNavigator) {
     "use strict";
     var classNames = {
-        DETACH: 'detach'
+        DETACH: 'detach',
+        olPopup: 'ol-popup',
+        olPopupCloser: 'ol-popup-closer',
+        olPopupContent: 'ol-popup-content'
+    };
+    var eventNames = {
+        show: "show",
+        hide: "hide",
+        next: "next-page",
     };
     /**
      * extends the base object without replacing defined attributes
@@ -299,27 +307,31 @@ define("src/ol3-popup", ["require", "exports", "openlayers", "src/paging/paging"
             var _this = this;
             var options = this.options;
             var domNode = this.domNode = document.createElement('div');
-            domNode.className = 'ol-popup';
+            domNode.className = classNames.olPopup;
             this.setElement(domNode);
             {
                 var closer = this.closer = document.createElement('button');
-                closer.className = 'ol-popup-closer';
+                closer.className = classNames.olPopupCloser;
                 domNode.appendChild(closer);
                 closer.addEventListener('click', function (evt) {
                     _this.hide();
                     evt.preventDefault();
                 }, false);
             }
-            var content = this.content = document.createElement('div');
-            content.className = 'ol-popup-content';
-            this.domNode.appendChild(content);
-            // Apply workaround to enable scrolling of content div on touch devices
-            isTouchDevice() && enableTouchScroll(content);
-            var pages = this.pages = new paging_1.Paging({ popup: this });
-            var pageNavigator = new PageNavigator({ pages: pages });
-            pageNavigator.hide();
-            pageNavigator.on("prev", function () { return pages.prev(); });
-            pageNavigator.on("next", function () { return pages.next(); });
+            {
+                var content = this.content = document.createElement('div');
+                content.className = classNames.olPopupContent;
+                this.domNode.appendChild(content);
+                // Apply workaround to enable scrolling of content div on touch devices
+                isTouchDevice() && enableTouchScroll(content);
+            }
+            {
+                var pages_1 = this.pages = new paging_1.Paging({ popup: this });
+                var pageNavigator = new PageNavigator({ pages: pages_1 });
+                pageNavigator.hide();
+                pageNavigator.on("prev", function () { return pages_1.prev(); });
+                pageNavigator.on("next", function () { return pages_1.next(); });
+            }
             {
                 var callback_1 = this.setPosition;
                 this.setPosition = debounce(function (args) { return callback_1.apply(_this, args); }, 50);
@@ -331,14 +343,13 @@ define("src/ol3-popup", ["require", "exports", "openlayers", "src/paging/paging"
         Popup.prototype.show = function (coord, html) {
             this.setPosition(coord);
             this.content.innerHTML = html;
-            this.domNode.classList.remove("hidden");
-            this.dispatch("show");
+            this.dispatch(eventNames.show);
             return this;
         };
         Popup.prototype.hide = function () {
-            this.domNode.classList.add("hidden");
+            this.setPosition(undefined);
             this.pages.clear();
-            this.dispatch("hide");
+            this.dispatch(eventNames.hide);
             return this;
         };
         Popup.prototype.detach = function () {
@@ -361,7 +372,25 @@ define("src/ol3-popup", ["require", "exports", "openlayers", "src/paging/paging"
     }(ol.Overlay));
     exports.Popup = Popup;
 });
-define("examples/feature-creator", ["require", "exports", "openlayers"], function (require, exports, ol) {
+define("examples/index", ["require", "exports"], function (require, exports) {
+    "use strict";
+    function run() {
+        var l = window.location;
+        var path = "" + l.origin + l.pathname + "?run=examples/";
+        var labs = "\n    paging\n    index\n    ";
+        document.writeln("\n    <p>\n    Watch the console output for failed assertions (blank is good).\n    </p>\n    ");
+        document.writeln(labs
+            .split(/ /)
+            .map(function (v) { return v.trim(); })
+            .filter(function (v) { return !!v; })
+            .sort()
+            .map(function (lab) { return ("<a href=" + path + lab + "&debug=1>" + lab + "</a>"); })
+            .join("<br/>"));
+    }
+    exports.run = run;
+    ;
+});
+define("extras/feature-creator", ["require", "exports", "openlayers"], function (require, exports, ol) {
     "use strict";
     /**
      * Used for testing, will create features when Alt+Clicking the map
@@ -410,7 +439,7 @@ define("examples/feature-creator", ["require", "exports", "openlayers"], functio
     }());
     return FeatureCreator;
 });
-define("examples/feature-selector", ["require", "exports"], function (require, exports) {
+define("extras/feature-selector", ["require", "exports"], function (require, exports) {
     "use strict";
     /**
      * Interaction which opens the popup when zero or more features are clicked
@@ -439,7 +468,7 @@ define("examples/feature-selector", ["require", "exports"], function (require, e
     }());
     return FeatureSelector;
 });
-define("examples/paging", ["require", "exports", "openlayers", "src/ol3-popup", "examples/feature-creator", "examples/feature-selector", "jquery"], function (require, exports, ol, Popup, FeatureCreator, FeatureSelector, $) {
+define("examples/paging", ["require", "exports", "openlayers", "ol3-popup", "extras/feature-creator", "extras/feature-selector", "jquery"], function (require, exports, ol, Popup, FeatureCreator, FeatureSelector, $) {
     "use strict";
     var sample_content = [
         'The story of the three little pigs...',
@@ -546,4 +575,4 @@ define("examples/paging", ["require", "exports", "openlayers", "src/ol3-popup", 
     }
     exports.run = run;
 });
-//# sourceMappingURL=popup.js.map
+//# sourceMappingURL=run.js.map
