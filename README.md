@@ -53,6 +53,10 @@ Show the popup.
 
 Hide the popup.
 
+##### `isOpened()`
+
+Returns `true` if the popup is opened, `false` otherwise
+
 ## License
 
 MIT (c) Matt Walker.

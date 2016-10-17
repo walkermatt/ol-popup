@@ -170,3 +170,10 @@ ol.Overlay.Popup.prototype.hide = function() {
     this.container.style.display = 'none';
     return this;
 };
+
+/**
+ * Indicates if the popup is in open state
+ */
+ol.Overlay.Popup.prototype.isOpened = function(){
+	return this.container.style.display == 'block';
+};
