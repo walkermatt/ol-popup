@@ -30,7 +30,7 @@ The source for all examples can be found in [examples](examples).
 
 |Name|Type|Description|
 |:---|:---|:----------|
-{% for param in class.params %}|`{{ param.name }}`|`{{ param.type.names[0] }}`| {{ param.description }} |{% endfor %}
+{% for param in class.params %}|`{{ param.name }}`|`{{ param.type.names.join('` or `') }}`| {{ param.description }} |{% endfor %}
 
 #### Extends
 
@@ -49,7 +49,7 @@ The source for all examples can be found in [examples](examples).
 |Name|Type|Description|
 |:---|:---|:----------|
 {% for param in method.params -%}
-|`{{ param.name }}`|`{{ param.type.names[0] }}`| {{ param.description }} |
+|`{{ param.name }}`|`{{ param.type.names.join('` or `') }}`| {{ param.description }} |
 {% endfor %}
 
 {% endif %}

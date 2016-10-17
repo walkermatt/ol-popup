@@ -46,7 +46,7 @@ Show the popup.
 |Name|Type|Description|
 |:---|:---|:----------|
 |`coord`|`ol.Coordinate`| Where to anchor the popup. |
-|`html`|`String`| String of HTML to display within the popup. |
+|`html`|`String` or `HTMLElement`| String or element of HTML to display within the popup. |
 
 
 ##### `hide()`
