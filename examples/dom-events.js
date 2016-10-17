@@ -15,9 +15,13 @@ var popup = new ol.Overlay.Popup();
 map.addOverlay(popup);
 
 map.on('singleclick', function(evt) {
-    var content = '<h2>Close the popup?</h2>';
-    content += '<p><a href="#" data-action="yes">Yes</a>, <a href="#" data-action="no">No</a></p>';
-    popup.show(evt.coordinate, content);
+	var el = document.createElement("div");
+	var title = document.createElement("h2"); title.innerHTML = 'Close the popup?';
+    el.appendChild(title);
+	var content = document.createElement("p");
+	content.innerHTML = '<a href="#" data-action="yes">Yes</a>, <a href="#" data-action="no">No</a>';
+	el.appendChild(content);
+    popup.show(evt.coordinate, el);
 });
 
 // Add a click event handler to the popup DOM element which we will use to
