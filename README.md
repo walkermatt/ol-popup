@@ -53,6 +53,22 @@ Show the popup.
 
 Hide the popup.
 
+## Contributing
+
+Contributions are welcome, please [create an issue](https://github.com/walkermatt/ol3-popup/issues) first to discuss any potential contributions.
+
+### Updating README.md
+
+`README.md` is generated from the [JSDoc](http://usejsdoc.org/) comments in the source code and the template `util/README.md`. To update the API docs edit the comments in the code; to update the other text edit the template (`util/README.md`).
+
+Once you've made edits run the following which will recreate `README.md` using the JSDoc comments and template:
+
+    npm run doc
+
+In order to use the `doc` npm script you will need to install the `devDependencies`:
+
+    npm install --only=dev
+
 ## License
 
 MIT (c) Matt Walker.
