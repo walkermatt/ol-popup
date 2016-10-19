@@ -53,6 +53,10 @@ Show the popup.
 
 Hide the popup.
 
+##### `isOpened()`
+
+Indicates if the popup is in open state
+
 ## Contributing
 
 Contributions are welcome, please [create an issue](https://github.com/walkermatt/ol3-popup/issues) first to discuss any potential contributions.
