@@ -22,8 +22,7 @@ The source for all examples can be found in [examples](examples).
 
 ### `new ol.Overlay.Popup(opt_options)`
 
-OpenLayers 3 Popup Overlay.
-See [the examples](./examples) for usage. Styling can be done via CSS.
+OpenLayers 3 Popup Overlay.See [the examples](./examples) for usage. Styling can be done via CSS.
 
 #### Parameters:
 
@@ -52,6 +51,10 @@ Show the popup.
 ##### `hide()`
 
 Hide the popup.
+
+##### `isOpened()`
+
+Indicates if the popup is in open state
 
 ## Contributing
 
