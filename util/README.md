@@ -15,7 +15,9 @@ The examples demonstrate usage and can be viewed online thanks to [RawGit](http:
     * Controlling popup dimensions and scrolling overflowing content
 * [Multiple popups](http://rawgit.com/walkermatt/ol3-popup/master/examples/multiple.html)
     * Add a new popup each time the maps is clicked
-
+* [Tooltip](http://rawgit.com/walkermatt/ol3-popup/master/examples/tooltip.html)
+    * Create a popup instance as tooltip (on map 'pointermove')
+    
 The source for all examples can be found in [examples](examples).
 
 ## API

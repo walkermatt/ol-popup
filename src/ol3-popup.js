@@ -7,6 +7,8 @@
  *                              **`panMapIfOutOfView`** `Boolean` - Should the
  *                              map be panned so that the popup is entirely
  *                              within view.
+ *                              **`isTooltip`** `Boolean` - Should the popup tooltip
+ *                              mode used instead of classic popup			
  */
 ol.Overlay.Popup = function(opt_options) {
 
@@ -17,6 +19,8 @@ ol.Overlay.Popup = function(opt_options) {
         this.panMapIfOutOfView = true;
     }
 
+    this.isTooltip = (options.isTooltip)? options.isTooltip : false;
+	
     this.ani = options.ani;
     if (this.ani === undefined) {
         this.ani = ol.animation.pan;
@@ -28,22 +32,24 @@ ol.Overlay.Popup = function(opt_options) {
     }
 
     this.container = document.createElement('div');
-    this.container.className = 'ol-popup';
+    this.container.className = (this.isTooltip) ? 'ol-tooltip' : 'ol-popup';
 
-    this.closer = document.createElement('a');
-    this.closer.className = 'ol-popup-closer';
-    this.closer.href = '#';
-    this.container.appendChild(this.closer);
+    if( !this.isTooltip ) {
+        this.closer = document.createElement('a');
+        this.closer.className = 'ol-popup-closer';
+        this.closer.href = '#';
+        this.container.appendChild(this.closer);
 
-    var that = this;
-    this.closer.addEventListener('click', function(evt) {
-        that.container.style.display = 'none';
-        that.closer.blur();
-        evt.preventDefault();
-    }, false);
+        var that = this;
+        this.closer.addEventListener('click', function(evt) {
+            that.container.style.display = 'none';
+            that.closer.blur();
+            evt.preventDefault();
+        }, false);
+    }
 
     this.content = document.createElement('div');
-    this.content.className = 'ol-popup-content';
+    this.content.className = ( this.isTooltip )? 'ol-tooltip-content' : 'ol-popup-content';
     this.container.appendChild(this.content);
 
     // Apply workaround to enable scrolling of content div on touch devices
@@ -177,4 +183,12 @@ ol.Overlay.Popup.prototype.hide = function() {
  */
 ol.Overlay.Popup.prototype.isOpened = function() {
     return this.container.style.display == 'block';
+};
+
+
+/**
+ * Indicates if the popup is a tooltip
+ */
+ol.Overlay.Popup.prototype.isTooltip = function() {
+    return this.isTooltip;
 };
