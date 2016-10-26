@@ -68,3 +68,53 @@
 .ol-popup.marker {
     margin-bottom: 30px;
 }
+
+/**
+ * Tooltip popup
+ *
+ */
+.ol-tooltip {
+    background-color: transparent;
+    bottom: 12px;
+    display: none;
+    left: -50px; padding: 0;
+    position: absolute;
+}
+
+.ol-tooltip:after, .ol-tooltip:before {
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 100%;
+    width: 0;
+}
+
+.ol-tooltip:after {
+    border-top-color: rgba(237,239,151,.8);
+    border-width: 10px;
+    left: 48px;
+    margin-left: -10px;
+}
+
+.ol-tooltip:before {
+    border-top-color: transparent;
+    border-width: 11px;
+    left: 48px;
+    margin-left: -11px;
+}
+.ol-tooltip-content {
+    background-color: rgba(237,239,151,.8);
+    border-radius: 8px;
+    box-shadow: 2px 2px 2px rgba(0,0,0,.4);
+    color: rgba(0,0,0,.8);
+    font-family: Verdana, Geneva, Helvetica, Arial, sans-serif;
+    font-size: 10px;
+    max-height: 200px;
+    min-width: 100px;
+    width:auto;
+    overflow-x: auto;
+    padding: 4px 8px;
+}
+

@@ -15,7 +15,9 @@ The examples demonstrate usage and can be viewed online thanks to [RawGit](http:
     * Controlling popup dimensions and scrolling overflowing content
 * [Multiple popups](http://rawgit.com/walkermatt/ol3-popup/master/examples/multiple.html)
     * Add a new popup each time the maps is clicked
-
+* [Tooltip](http://rawgit.com/walkermatt/ol3-popup/master/examples/tooltip.html)
+    * Create a popup instance as tooltip (on map 'pointermove')
+    
 The source for all examples can be found in [examples](examples).
 
 ## API
@@ -29,7 +31,7 @@ See [the examples](./examples) for usage. Styling can be done via CSS.
 
 |Name|Type|Description|
 |:---|:---|:----------|
-|`opt_options`|`Object`| Overlay options, extends olx.OverlayOptions adding: **`panMapIfOutOfView`** `Boolean` - Should the map be panned so that the popup is entirely within view. |
+|`opt_options`|`Object`| Overlay options, extends olx.OverlayOptions adding: **`panMapIfOutOfView`** `Boolean` - Should the map be panned so that the popup is entirely within view. **`isTooltip`** `Boolean` - Should the popup tooltip mode used instead of classic popup |
 
 #### Extends
 
@@ -56,6 +58,10 @@ Hide the popup.
 ##### `isOpened()`
 
 Indicates if the popup is in open state
+
+##### `isTooltip()`
+
+Indicates if the popup is a tooltip
 
 ## Contributing
 
