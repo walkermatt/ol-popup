@@ -29,7 +29,7 @@ See [the examples](./examples) for usage. Styling can be done via CSS.
 
 |Name|Type|Description|
 |:---|:---|:----------|
-|`opt_options`|`Object`| Overlay options, extends olx.OverlayOptions adding: **`panMapIfOutOfView`** `Boolean` - Should the map be panned so that the popup is entirely within view. |
+|`opt_options`|`Object`| Overlay options. |
 
 #### Extends
 
