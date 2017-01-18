@@ -37,8 +37,8 @@ function debounce<T extends Function>(func: T, wait = 20, immediate = false): T 
         let later = () => {
             timeout = null;
             if (!immediate) func.call(this, args);
-        },
-            callNow = immediate && !timeout;
+        };
+        let callNow = immediate && !timeout;
 
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
@@ -71,73 +71,121 @@ function enableTouchScroll(elm: HTMLElement) {
 }
 
 /**
- * The constructor options 'must' conform
+ * The constructor options 'must' conform, most interesting is autoPan
  */
 export interface IPopupOptions extends olx.OverlayOptions {
+    // calls panIntoView when position changes
+    autoPan?: boolean;
+    // when panning into view, passed to the pan animation to track the 'center'
+    autoPanAnimation?: {
+        // how long should the animation last?
+        duration: number;
+        source: any;
+    };
+    // virtually increases the control width & height by this amount when computing new center point
+    autoPanMargin?: number;
+    // determines if this should be the first (or last) element in its container
+    insertFirst?: boolean;
+    // determines which container to use, if true then event propagation is stopped meaning mousedown and touchstart events don't reach the map.
+    stopEvent?: boolean;
+    // the pixel offset when computing the rendered position
+    offset?: number[];
+    // one of (bottom|center|top)*(left|center|right), css positioning when updating the rendered position
+    positioning?: string;
+    // the point coordinate for this overlay
+    position?: [number, number];
 };
 
 /**
- * Default options for the popup control so it can be created without any contructor arguments 
+ * Default options for the popup control so it can be created without any contructor arguments
  */
 const DEFAULT_OPTIONS: IPopupOptions = {
-    stopEvent: true,
+    // determines if this should be the first (or last) element in its container
     insertFirst: true,
     autoPan: true,
     autoPanAnimation: {
-        duration: 250,
-        source: null
-    }
+        source: null,
+        duration: 250
+    },
+    positioning: "top-right", // ol.OverlayPositioning.TOP_RIGHT
+    stopEvent: true
 }
 
 /**
+ * This is the contract that will not break between versions
+ */
+export interface IPopup_2_0_4<T> {
+    show(position: ol.Coordinate, markup: string): T;
+    hide(): T;
+}
+
+export interface IPopup extends IPopup_2_0_4<Popup> { 
+}
+    
+/**
  * The control formerly known as ol.Overlay.Popup 
  */
-export class Popup extends ol.Overlay {
+export class Popup extends ol.Overlay implements IPopup {
     options: IPopupOptions;
     content: HTMLDivElement;
     domNode: HTMLDivElement;
-    closer: HTMLAnchorElement;
+    closer: HTMLButtonElement;
     pages: Paging;
 
     constructor(options = DEFAULT_OPTIONS) {
 
         options = defaults({}, options, DEFAULT_OPTIONS);
+        /**
+         * overlays have a map, element, offset, position, positioning
+         */
         super(options);
         this.options = options;
+
+        // the internal properties, dom and listeners are in place, time to create the popup
         this.postCreate();
     }
+
 
     private postCreate() {
 
         let options = this.options;
 
         let domNode = this.domNode = document.createElement('div');
-        domNode.className = 'ol-popup';
+        domNode.className = classNames.olPopup;
         this.setElement(domNode);
 
-        let closer = this.closer = document.createElement('a');
-        closer.className = 'ol-popup-closer';
-        closer.href = '#';
-        domNode.appendChild(closer);
+        {
+            let closer = this.closer = document.createElement('button');
+            closer.className = classNames.olPopupCloser;
+            domNode.appendChild(closer);
 
-        closer.addEventListener('click', evt => {
-            this.hide();
-            closer.blur();
-            evt.preventDefault();
-        }, false);
+            closer.addEventListener('click', evt => {
+                this.hide();
+                evt.preventDefault();
+            }, false);
+        }
 
-        let content = this.content = document.createElement('div');
-        content.className = 'ol-popup-content';
-        this.domNode.appendChild(content);
+        {
+            let content = this.content = document.createElement('div');
+            content.className = classNames.olPopupContent;
+            this.domNode.appendChild(content);
+            // Apply workaround to enable scrolling of content div on touch devices
+            isTouchDevice() && enableTouchScroll(content);
+        }
 
-        // Apply workaround to enable scrolling of content div on touch devices
-        isTouchDevice() && enableTouchScroll(content);
+        {
+            let pages = this.pages = new Paging({ popup: this });
+            let pageNavigator = new PageNavigator({ pages: pages });
+            pageNavigator.hide();
+            pageNavigator.on("prev", () => pages.prev());
+            pageNavigator.on("next", () => pages.next());
+        }
 
-        let pages = this.pages = new Paging({ popup: this });
-        let pageNavigator = new PageNavigator({ pages: pages });
-        pageNavigator.hide();
-        pageNavigator.on("prev", () => pages.prev());
-        pageNavigator.on("next", () => pages.next());
+        {
+            let callback = this.setPosition;
+            this.setPosition = debounce(args => callback.apply(this, args), 50);
+        }
+
     }
 
     dispatch(name: string) {
@@ -155,12 +203,16 @@ export class Popup extends ol.Overlay {
         this.domNode.classList.remove("hidden");
 
         this.setPosition(coord);
+
+        this.content.scrollTop = 0;
+
         this.dispatch(eventNames.show);
-        return this;
+
+      return this;
     }
 
     hide() {
-        this.domNode.classList.add("hidden");
+        this.setPosition(undefined);
         this.pages.clear();
         this.dispatch(eventNames.hide);
         return this;

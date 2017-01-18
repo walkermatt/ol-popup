@@ -34,5 +34,4 @@ class FeatureSelector {
     }
 }
 
-
 export = FeatureSelector;

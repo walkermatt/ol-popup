@@ -260,7 +260,8 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
                 timeout = null;
                 if (!immediate)
                     func.call(_this, args);
-            }, callNow = immediate && !timeout;
+            };
+            var callNow = immediate && !timeout;
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
             if (callNow)
@@ -295,13 +296,15 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
      * Default options for the popup control so it can be created without any contructor arguments
      */
     var DEFAULT_OPTIONS = {
-        stopEvent: true,
+        // determines if this should be the first (or last) element in its container
         insertFirst: true,
         autoPan: true,
         autoPanAnimation: {
-            duration: 250,
-            source: null
-        }
+            source: null,
+            duration: 250
+        },
+        positioning: "top-right",
+        stopEvent: true
     };
     /**
      * The control formerly known as ol.Overlay.Popup
@@ -311,35 +314,47 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
         function Popup(options) {
             if (options === void 0) { options = DEFAULT_OPTIONS; }
             options = defaults({}, options, DEFAULT_OPTIONS);
+            /**
+             * overlays have a map, element, offset, position, positioning
+             */
             _super.call(this, options);
             this.options = options;
+            // the internal properties, dom and listeners are in place, time to create the popup
             this.postCreate();
         }
         Popup.prototype.postCreate = function () {
             var _this = this;
             var options = this.options;
             var domNode = this.domNode = document.createElement('div');
-            domNode.className = 'ol-popup';
+            domNode.className = classNames.olPopup;
             this.setElement(domNode);
-            var closer = this.closer = document.createElement('a');
-            closer.className = 'ol-popup-closer';
-            closer.href = '#';
-            domNode.appendChild(closer);
-            closer.addEventListener('click', function (evt) {
-                _this.hide();
-                closer.blur();
-                evt.preventDefault();
-            }, false);
-            var content = this.content = document.createElement('div');
-            content.className = 'ol-popup-content';
-            this.domNode.appendChild(content);
-            // Apply workaround to enable scrolling of content div on touch devices
-            isTouchDevice() && enableTouchScroll(content);
-            var pages = this.pages = new paging_1.Paging({ popup: this });
-            var pageNavigator = new PageNavigator({ pages: pages });
-            pageNavigator.hide();
-            pageNavigator.on("prev", function () { return pages.prev(); });
-            pageNavigator.on("next", function () { return pages.next(); });
+            {
+                var closer = this.closer = document.createElement('button');
+                closer.className = classNames.olPopupCloser;
+                domNode.appendChild(closer);
+                closer.addEventListener('click', function (evt) {
+                    _this.hide();
+                    evt.preventDefault();
+                }, false);
+            }
+            {
+                var content = this.content = document.createElement('div');
+                content.className = classNames.olPopupContent;
+                this.domNode.appendChild(content);
+                // Apply workaround to enable scrolling of content div on touch devices
+                isTouchDevice() && enableTouchScroll(content);
+            }
+            {
+                var pages_1 = this.pages = new paging_1.Paging({ popup: this });
+                var pageNavigator = new PageNavigator({ pages: pages_1 });
+                pageNavigator.hide();
+                pageNavigator.on("prev", function () { return pages_1.prev(); });
+                pageNavigator.on("next", function () { return pages_1.next(); });
+            }
+            {
+                var callback_1 = this.setPosition;
+                this.setPosition = debounce(function (args) { return callback_1.apply(_this, args); }, 50);
+            }
         };
         Popup.prototype.dispatch = function (name) {
             this["dispatchEvent"](new Event(name));
@@ -354,11 +369,12 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
             }
             this.domNode.classList.remove("hidden");
             this.setPosition(coord);
+            this.content.scrollTop = 0;
             this.dispatch(eventNames.show);
             return this;
         };
         Popup.prototype.hide = function () {
-            this.domNode.classList.add("hidden");
+            this.setPosition(undefined);
             this.pages.clear();
             this.dispatch(eventNames.hide);
             return this;

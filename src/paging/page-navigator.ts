@@ -1,3 +1,5 @@
+import { Paging } from "./paging";
+
 /**
  * The prior + next paging buttons and current page indicator
  */
