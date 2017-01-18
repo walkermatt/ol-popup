@@ -1,5 +1,8 @@
 import ol = require("openlayers");
-import Popup = require("../src/ol3-popup");
+import Popup = require("../ol3-popup");
+import FeatureCreator = require("../extras/feature-creator");
+import FeatureSelector = require("../extras/feature-selector");
+
 import $ = require("jquery");
 
 const sample_content = [
@@ -29,7 +32,15 @@ export function run() {
         })
     });
 
-    let popup = new Popup.Popup();
+    let popup = new Popup.Popup({
+        autoPan: true,
+        autoPanMargin: 100,
+        autoPanAnimation: {
+            source: null,
+            duration: 2000
+        }
+    });
+
     map.addOverlay(popup);
     popup.on("show", () => console.log(`show popup`));
     popup.on("hide", () => console.log(`hide popup`));
@@ -87,7 +98,7 @@ export function run() {
                     popup.pages.add(() => {
                         let d = $.Deferred();
                         let div = document.createElement("div");
-                        let markup = `<p>This function promise resolves to a div element</p><p>Version: ${version++}</p>`;
+                        let markup = `<p>This function promise resolves to a div element, watch the version change 1 second after visiting this page.</p><p>Version: ${version++}</p>`;
                         setInterval(() => div.innerHTML = `${markup}<p>Timestamp: ${new Date().toISOString()}<p/>`, 100);
                         setTimeout(() => d.resolve(div), 1000);
                         return d;
@@ -104,13 +115,13 @@ export function run() {
         }, 200);
     }, 500);
 
-    let selector = new Popup.FeatureSelector({
+    let selector = new FeatureSelector({
         map: map,
         popup: popup,
         title: "Alt+Click creates markers",
     });
 
-    new Popup.FeatureCreator({
+    new FeatureCreator({
         map: map
     });
 

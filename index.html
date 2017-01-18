@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>OpenLayers 3 - Popup</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <style>
+        @import url('./bower_components/openlayers/ol.css');
+        @import url('./built/css/ol3-popup.css');
+        head,
+        body {
+            width: 100%;
+            height: 100%;
+            /*
+            when debug=0 does not autoPan!
+            */
+            margin: 0;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <script src="./bower_components/requirejs/require.js"></script>
+    <script>
+        (function() {
+
+            function getParameterByName(name, url = window.location.href) {
+                name = name.replace(/[\[\]]/g, "\\$&");
+                var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                    results = regex.exec(url);
+                if (!results) return null;
+                if (!results[2]) return '';
+                return decodeURIComponent(results[2].replace(/\+/g, " "));
+            }
+            
+            let debug = getParameterByName("debug") === "1";
+
+            require.config({
+                
+                packages: [
+                    {
+                        name: 'openlayers',
+                        location: './bower_components/openlayers',
+                        main: debug ? 'ol-debug' : 'ol'
+                    },
+                    {
+                        name: 'jquery',
+                        location: './bower_components/jquery',
+                        main: debug ? 'dist/jquery' : 'dist/jquery.min'
+                    }
+                ],
+                
+                deps: ["built/run"],
+
+                callback: () => {
+                    require([getParameterByName("run") || "examples/index"], test => test.run());
+                }
+
+            });
+        })();
+    </script>
+</head>
+
+<body>
+    <div id="map"></div>
+</body>
+
+</html>

@@ -4,12 +4,13 @@
         "target": "es5",
         "declaration": false,
         "noImplicitAny": false,
-        "outFile": "built/run.js",
-        "sourceMap": true
+        "sourceMap": true,
+        "outFile": "./built/popup.js"
     },
+    "files": [
+        "./src/ol3-popup.ts",
+        "./typings/index.d.ts"
+    ],
     "exclude": [
-        "node_modules",
-        "bower_components",
-        "dist"
     ]
 }
