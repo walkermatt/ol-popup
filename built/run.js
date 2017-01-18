@@ -3,6 +3,24 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+define("examples/index", ["require", "exports"], function (require, exports) {
+    "use strict";
+    function run() {
+        var l = window.location;
+        var path = "" + l.origin + l.pathname + "?run=examples/";
+        var labs = "\n    paging\n    index\n    ";
+        document.writeln("\n    <p>\n    Watch the console output for failed assertions (blank is good).\n    </p>\n    ");
+        document.writeln(labs
+            .split(/ /)
+            .map(function (v) { return v.trim(); })
+            .filter(function (v) { return !!v; })
+            .sort()
+            .map(function (lab) { return ("<a href=" + path + lab + "&debug=1>" + lab + "</a>"); })
+            .join("<br/>"));
+    }
+    exports.run = run;
+    ;
+});
 define("paging/paging", ["require", "exports", "openlayers"], function (require, exports, ol) {
     "use strict";
     function getInteriorPoint(geom) {
@@ -372,103 +390,7 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
     }(ol.Overlay));
     exports.Popup = Popup;
 });
-define("examples/index", ["require", "exports"], function (require, exports) {
-    "use strict";
-    function run() {
-        var l = window.location;
-        var path = "" + l.origin + l.pathname + "?run=examples/";
-        var labs = "\n    paging\n    index\n    ";
-        document.writeln("\n    <p>\n    Watch the console output for failed assertions (blank is good).\n    </p>\n    ");
-        document.writeln(labs
-            .split(/ /)
-            .map(function (v) { return v.trim(); })
-            .filter(function (v) { return !!v; })
-            .sort()
-            .map(function (lab) { return ("<a href=" + path + lab + "&debug=1>" + lab + "</a>"); })
-            .join("<br/>"));
-    }
-    exports.run = run;
-    ;
-});
-define("extras/feature-creator", ["require", "exports", "openlayers"], function (require, exports, ol) {
-    "use strict";
-    /**
-     * Used for testing, will create features when Alt+Clicking the map
-     */
-    var FeatureCreator = (function () {
-        function FeatureCreator(options) {
-            this.options = options;
-            var map = options.map;
-            var vectorSource = new ol.source.Vector({
-                features: []
-            });
-            var vectorLayer = new ol.layer.Vector({
-                source: vectorSource,
-                style: new ol.style.Style({
-                    fill: new ol.style.Fill({
-                        color: 'rgba(255, 255, 255, 0.2)'
-                    }),
-                    stroke: new ol.style.Stroke({
-                        color: '#ffcc33',
-                        width: 2
-                    }),
-                    image: new ol.style.Circle({
-                        radius: 7,
-                        fill: new ol.style.Fill({
-                            color: '#ffcc33'
-                        })
-                    })
-                })
-            });
-            map.addLayer(vectorLayer);
-            map.on("click", function (event) {
-                if (!ol.events.condition.altKeyOnly(event))
-                    return;
-                event = event["mapBrowserEvent"] || event;
-                var coord = event.coordinate;
-                var geom = new ol.geom.Point(coord);
-                var feature = new ol.Feature({
-                    geometry: geom,
-                    name: "New Feature",
-                    attributes: {}
-                });
-                vectorSource.addFeature(feature);
-            });
-        }
-        return FeatureCreator;
-    }());
-    return FeatureCreator;
-});
-define("extras/feature-selector", ["require", "exports"], function (require, exports) {
-    "use strict";
-    /**
-     * Interaction which opens the popup when zero or more features are clicked
-     */
-    var FeatureSelector = (function () {
-        function FeatureSelector(options) {
-            var _this = this;
-            this.options = options;
-            var map = options.map;
-            map.on("click", function (event) {
-                console.log("click");
-                var popup = options.popup;
-                var coord = event.coordinate;
-                popup.hide();
-                popup.show(coord, "<label>" + _this.options.title + "</label>");
-                var pageNum = 1;
-                map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
-                    var page = document.createElement('p');
-                    page.innerHTML = "Page " + pageNum++ + " " + feature.getGeometryName();
-                    popup.pages.add(page, feature.getGeometry());
-                });
-                popup.pages.goto(0);
-            });
-        }
-        return FeatureSelector;
-    }());
-    return FeatureSelector;
-});
-define("examples/paging", ["require", "exports", "openlayers", "ol3-popup", "extras/feature-creator", "extras/feature-selector", "jquery"], function (require, exports, ol, Popup, FeatureCreator, FeatureSelector, $) {
+define("examples/paging", ["require", "exports", "openlayers", "ol3-popup", "./extras/feature-creator", "./extras/feature-selector", "jquery"], function (require, exports, ol, Popup, FeatureCreator, FeatureSelector, $) {
     "use strict";
     var sample_content = [
         'The story of the three little pigs...',
@@ -574,5 +496,83 @@ define("examples/paging", ["require", "exports", "openlayers", "ol3-popup", "ext
         });
     }
     exports.run = run;
+});
+define("extras/feature-creator", ["require", "exports", "openlayers"], function (require, exports, ol) {
+    "use strict";
+    /**
+     * Used for testing, will create features when Alt+Clicking the map
+     */
+    var FeatureCreator = (function () {
+        function FeatureCreator(options) {
+            this.options = options;
+            var map = options.map;
+            var vectorSource = new ol.source.Vector({
+                features: []
+            });
+            var vectorLayer = new ol.layer.Vector({
+                source: vectorSource,
+                style: new ol.style.Style({
+                    fill: new ol.style.Fill({
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: '#ffcc33',
+                        width: 2
+                    }),
+                    image: new ol.style.Circle({
+                        radius: 7,
+                        fill: new ol.style.Fill({
+                            color: '#ffcc33'
+                        })
+                    })
+                })
+            });
+            map.addLayer(vectorLayer);
+            map.on("click", function (event) {
+                if (!ol.events.condition.altKeyOnly(event))
+                    return;
+                event = event["mapBrowserEvent"] || event;
+                var coord = event.coordinate;
+                var geom = new ol.geom.Point(coord);
+                var feature = new ol.Feature({
+                    geometry: geom,
+                    name: "New Feature",
+                    attributes: {}
+                });
+                vectorSource.addFeature(feature);
+            });
+        }
+        return FeatureCreator;
+    }());
+    return FeatureCreator;
+});
+define("extras/feature-selector", ["require", "exports"], function (require, exports) {
+    "use strict";
+    /**
+     * Interaction which opens the popup when zero or more features are clicked
+     */
+    var FeatureSelector = (function () {
+        function FeatureSelector(options) {
+            var _this = this;
+            this.options = options;
+            var map = options.map;
+            map.on("click", function (event) {
+                console.log("click");
+                var popup = options.popup;
+                var coord = event.coordinate;
+                popup.hide();
+                popup.show(coord, "<label>" + _this.options.title + "</label>");
+                var pageNum = 1;
+                map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
+                    var page = document.createElement('p');
+                    page.innerHTML = "Page " + pageNum++ + " " + feature.getGeometryName();
+                    popup.pages.add(page, feature.getGeometry());
+                });
+                popup.pages.goto(0);
+            });
+        }
+        return FeatureSelector;
+    }());
+    return FeatureSelector;
 });
 //# sourceMappingURL=run.js.map
