@@ -346,16 +346,11 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
             }
             {
                 var pages_1 = this.pages = new paging_1.Paging({ popup: this });
-                var pageNavigator_1 = new PageNavigator({ pages: pages_1 });
-                pageNavigator_1.hide();
-                pageNavigator_1.on("prev", function () { return pages_1.prev(); });
-                pageNavigator_1.on("next", function () { return pages_1.next(); });
+                var pageNavigator = new PageNavigator({ pages: pages_1 });
+                pageNavigator.hide();
+                pageNavigator.on("prev", function () { return pages_1.prev(); });
+                pageNavigator.on("next", function () { return pages_1.next(); });
             }
-            var pages = this.pages = new paging_1.Paging({ popup: this });
-            var pageNavigator = new PageNavigator({ pages: pages });
-            pageNavigator.hide();
-            pageNavigator.on("prev", function () { return pages.prev(); });
-            pageNavigator.on("next", function () { return pages.next(); });
             {
                 var callback_1 = this.setPosition;
                 this.setPosition = debounce(function (args) { return callback_1.apply(_this, args); }, 50);
