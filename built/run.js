@@ -228,7 +228,7 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
     var eventNames = {
         show: "show",
         hide: "hide",
-        next: "next-page",
+        next: "next-page"
     };
     /**
      * extends the base object without replacing defined attributes
@@ -300,6 +300,7 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
         insertFirst: true,
         autoPan: true,
         autoPanAnimation: {
+            source: null,
             duration: 250
         },
         positioning: "top-right",
@@ -312,12 +313,12 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
         __extends(Popup, _super);
         function Popup(options) {
             if (options === void 0) { options = DEFAULT_OPTIONS; }
+            options = defaults({}, options, DEFAULT_OPTIONS);
             /**
              * overlays have a map, element, offset, position, positioning
              */
             _super.call(this, options);
-            // options are captured within the overlay constructor so make them accessible from the outside        
-            this.options = defaults({}, options, DEFAULT_OPTIONS);
+            this.options = options;
             // the internal properties, dom and listeners are in place, time to create the popup
             this.postCreate();
         }
@@ -345,11 +346,16 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
             }
             {
                 var pages_1 = this.pages = new paging_1.Paging({ popup: this });
-                var pageNavigator = new PageNavigator({ pages: pages_1 });
-                pageNavigator.hide();
-                pageNavigator.on("prev", function () { return pages_1.prev(); });
-                pageNavigator.on("next", function () { return pages_1.next(); });
+                var pageNavigator_1 = new PageNavigator({ pages: pages_1 });
+                pageNavigator_1.hide();
+                pageNavigator_1.on("prev", function () { return pages_1.prev(); });
+                pageNavigator_1.on("next", function () { return pages_1.next(); });
             }
+            var pages = this.pages = new paging_1.Paging({ popup: this });
+            var pageNavigator = new PageNavigator({ pages: pages });
+            pageNavigator.hide();
+            pageNavigator.on("prev", function () { return pages.prev(); });
+            pageNavigator.on("next", function () { return pages.next(); });
             {
                 var callback_1 = this.setPosition;
                 this.setPosition = debounce(function (args) { return callback_1.apply(_this, args); }, 50);
@@ -359,8 +365,16 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
             this["dispatchEvent"](new Event(name));
         };
         Popup.prototype.show = function (coord, html) {
+            if (html instanceof HTMLElement) {
+                this.content.innerHTML = "";
+                this.content.appendChild(html);
+            }
+            else {
+                this.content.innerHTML = html;
+            }
+            this.domNode.classList.remove("hidden");
             this.setPosition(coord);
-            this.content.innerHTML = html;
+            this.content.scrollTop = 0;
             this.dispatch(eventNames.show);
             return this;
         };
@@ -369,6 +383,9 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
             this.pages.clear();
             this.dispatch(eventNames.hide);
             return this;
+        };
+        Popup.prototype.isOpened = function () {
+            return this.domNode.classList.contains("hidden");
         };
         Popup.prototype.detach = function () {
             var _this = this;
@@ -389,113 +406,6 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
         return Popup;
     }(ol.Overlay));
     exports.Popup = Popup;
-});
-define("examples/paging", ["require", "exports", "openlayers", "ol3-popup", "./extras/feature-creator", "./extras/feature-selector", "jquery"], function (require, exports, ol, Popup, FeatureCreator, FeatureSelector, $) {
-    "use strict";
-    var sample_content = [
-        'The story of the three little pigs...',
-        'This little piggy went to market',
-        'This little piggy stayed home',
-        'This little piggy had roast beef',
-        'This little piggy had none',
-        'And this little piggy, <br/>this wee little piggy, <br/>when wee, wee, wee, wee <br/>all the way home!',
-    ];
-    var center = ol.proj.transform([-0.92, 52.96], 'EPSG:4326', 'EPSG:3857');
-    var mapContainer = document.getElementById("map");
-    function run() {
-        var map = new ol.Map({
-            target: mapContainer,
-            layers: [
-                new ol.layer.Tile({
-                    source: new ol.source.OSM()
-                })
-            ],
-            view: new ol.View({
-                center: center,
-                zoom: 6
-            })
-        });
-        var popup = new Popup.Popup({
-            autoPan: true,
-            autoPanMargin: 100,
-            autoPanAnimation: {
-                duration: 2000
-            }
-        });
-        map.addOverlay(popup);
-        popup.on("show", function () { return console.log("show popup"); });
-        popup.on("hide", function () { return console.log("hide popup"); });
-        popup.pages.on("goto", function () { return console.log("goto page: " + popup.pages.activeIndex); });
-        setTimeout(function () {
-            popup.show(center, "<div>Click the map to see a popup</div>");
-            var pages = 0;
-            console.log("adding 5 pages");
-            var h = setInterval(function () {
-                if (++pages === 5) {
-                    console.log("detaching from map (docking)");
-                    clearInterval(h);
-                    var attach_1 = popup.detach();
-                    var h2_1 = popup.on("hide", function () {
-                        popup.unByKey(h2_1);
-                        attach_1.off();
-                    });
-                    setTimeout(function () {
-                        console.log("re-attaching to map (un-docking)");
-                        attach_1.off();
-                        console.log("adding a page with string and dom promise");
-                        {
-                            var d1_1 = $.Deferred();
-                            popup.pages.add(d1_1);
-                            setTimeout(function () { return d1_1.resolve('<p>This promise resolves to a string<p>'); }, 500);
-                            var d2_1 = $.Deferred();
-                            popup.pages.add(d2_1);
-                            var div_1 = document.createElement("div");
-                            div_1.innerHTML = '<p>This function promise resolves to a div element</p>';
-                            setTimeout(function () { return d2_1.resolve(div_1); }, 100);
-                        }
-                        console.log("adding a page with a string callback");
-                        popup.pages.add(function () { return '<p>This function returns a string</p>'; });
-                        console.log("adding a page with a dom callback");
-                        popup.pages.add(function () {
-                            var div = document.createElement("div");
-                            div.innerHTML = '<p>This function returns a div element</p>';
-                            return div;
-                        });
-                        console.log("adding a page with a string-promise");
-                        popup.pages.add(function () {
-                            var d = $.Deferred();
-                            d.resolve('<p>This function promise resolves to a string</p>');
-                            return d;
-                        });
-                        console.log("adding a page with a dom-promise");
-                        var version = 1;
-                        popup.pages.add(function () {
-                            var d = $.Deferred();
-                            var div = document.createElement("div");
-                            var markup = "<p>This function promise resolves to a div element, watch the version change 1 second after visiting this page.</p><p>Version: " + version++ + "</p>";
-                            setInterval(function () { return div.innerHTML = markup + "<p>Timestamp: " + new Date().toISOString() + "<p/>"; }, 100);
-                            setTimeout(function () { return d.resolve(div); }, 1000);
-                            return d;
-                        });
-                        popup.pages.goto(popup.pages.count - 1);
-                    }, 1000);
-                }
-                var div = document.createElement("div");
-                div.innerHTML = "PAGE " + pages + "<br/>" + sample_content[pages % sample_content.length];
-                popup.pages.add(div);
-                popup.pages.goto(0);
-            }, 200);
-        }, 500);
-        var selector = new FeatureSelector({
-            map: map,
-            popup: popup,
-            title: "Alt+Click creates markers",
-        });
-        new FeatureCreator({
-            map: map
-        });
-    }
-    exports.run = run;
 });
 define("extras/feature-creator", ["require", "exports", "openlayers"], function (require, exports, ol) {
     "use strict";
@@ -574,5 +484,113 @@ define("extras/feature-selector", ["require", "exports"], function (require, exp
         return FeatureSelector;
     }());
     return FeatureSelector;
+});
+define("examples/paging", ["require", "exports", "openlayers", "ol3-popup", "extras/feature-creator", "extras/feature-selector", "jquery"], function (require, exports, ol, Popup, FeatureCreator, FeatureSelector, $) {
+    "use strict";
+    var sample_content = [
+        'The story of the three little pigs...',
+        'This little piggy went to market',
+        'This little piggy stayed home',
+        'This little piggy had roast beef',
+        'This little piggy had none',
+        'And this little piggy, <br/>this wee little piggy, <br/>when wee, wee, wee, wee <br/>all the way home!',
+    ];
+    var center = ol.proj.transform([-0.92, 52.96], 'EPSG:4326', 'EPSG:3857');
+    var mapContainer = document.getElementById("map");
+    function run() {
+        var map = new ol.Map({
+            target: mapContainer,
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                })
+            ],
+            view: new ol.View({
+                center: center,
+                zoom: 6
+            })
+        });
+        var popup = new Popup.Popup({
+            autoPan: true,
+            autoPanMargin: 100,
+            autoPanAnimation: {
+                source: null,
+                duration: 2000
+            }
+        });
+        map.addOverlay(popup);
+        popup.on("show", function () { return console.log("show popup"); });
+        popup.on("hide", function () { return console.log("hide popup"); });
+        popup.pages.on("goto", function () { return console.log("goto page: " + popup.pages.activeIndex); });
+        setTimeout(function () {
+            popup.show(center, "<div>Click the map to see a popup</div>");
+            var pages = 0;
+            console.log("adding 5 pages");
+            var h = setInterval(function () {
+                if (++pages === 5) {
+                    console.log("detaching from map (docking)");
+                    clearInterval(h);
+                    var attach_1 = popup.detach();
+                    var h2_1 = popup.on("hide", function () {
+                        popup.unByKey(h2_1);
+                        attach_1.off();
+                    });
+                    setTimeout(function () {
+                        console.log("re-attaching to map (un-docking)");
+                        attach_1.off();
+                        console.log("adding a page with string and dom promise");
+                        {
+                            var d1_1 = $.Deferred();
+                            popup.pages.add(d1_1);
+                            setTimeout(function () { return d1_1.resolve('<p>This promise resolves to a string<p>'); }, 500);
+                            var d2_1 = $.Deferred();
+                            popup.pages.add(d2_1);
+                            var div_1 = document.createElement("div");
+                            div_1.innerHTML = '<p>This function promise resolves to a div element</p>';
+                            setTimeout(function () { return d2_1.resolve(div_1); }, 100);
+                        }
+                        console.log("adding a page with a string callback");
+                        popup.pages.add(function () { return '<p>This function returns a string</p>'; });
+                        console.log("adding a page with a dom callback");
+                        popup.pages.add(function () {
+                            var div = document.createElement("div");
+                            div.innerHTML = '<p>This function returns a div element</p>';
+                            return div;
+                        });
+                        console.log("adding a page with a string-promise");
+                        popup.pages.add(function () {
+                            var d = $.Deferred();
+                            d.resolve('<p>This function promise resolves to a string</p>');
+                            return d;
+                        });
+                        console.log("adding a page with a dom-promise");
+                        var version = 1;
+                        popup.pages.add(function () {
+                            var d = $.Deferred();
+                            var div = document.createElement("div");
+                            var markup = "<p>This function promise resolves to a div element, watch the version change 1 second after visiting this page.</p><p>Version: " + version++ + "</p>";
+                            setInterval(function () { return div.innerHTML = markup + "<p>Timestamp: " + new Date().toISOString() + "<p/>"; }, 100);
+                            setTimeout(function () { return d.resolve(div); }, 1000);
+                            return d;
+                        });
+                        popup.pages.goto(popup.pages.count - 1);
+                    }, 1000);
+                }
+                var div = document.createElement("div");
+                div.innerHTML = "PAGE " + pages + "<br/>" + sample_content[pages % sample_content.length];
+                popup.pages.add(div);
+                popup.pages.goto(0);
+            }, 200);
+        }, 500);
+        var selector = new FeatureSelector({
+            map: map,
+            popup: popup,
+            title: "Alt+Click creates markers",
+        });
+        new FeatureCreator({
+            map: map
+        });
+    }
+    exports.run = run;
 });
 //# sourceMappingURL=run.js.map

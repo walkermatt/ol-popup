@@ -1,7 +1,7 @@
 import ol = require("openlayers");
 import Popup = require("../ol3-popup");
-import FeatureCreator = require("./extras/feature-creator");
-import FeatureSelector = require("./extras/feature-selector");
+import FeatureCreator = require("../extras/feature-creator");
+import FeatureSelector = require("../extras/feature-selector");
 
 import $ = require("jquery");
 
@@ -36,9 +36,11 @@ export function run() {
         autoPan: true,
         autoPanMargin: 100,
         autoPanAnimation: {
+            source: null,
             duration: 2000
         }
     });
+
     map.addOverlay(popup);
     popup.on("show", () => console.log(`show popup`));
     popup.on("hide", () => console.log(`hide popup`));

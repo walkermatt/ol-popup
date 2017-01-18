@@ -1,13 +1,11 @@
 /**
  * OpenLayers 3 Popup Overlay.
- * Adopted from http://openlayers.org/en/latest/examples/popup.html?q=overlay
  */
 import ol = require("openlayers");
-
-import {Paging} from "./paging/paging";
+import { Paging } from "./paging/paging";
 import PageNavigator = require("./paging/page-navigator");
 
-const classNames = {
+let classNames = {
     DETACH: 'detach',
     olPopup: 'ol-popup',
     olPopupCloser: 'ol-popup-closer',
@@ -17,8 +15,7 @@ const classNames = {
 const eventNames = {
     show: "show",
     hide: "hide",
-    next: "next-page",
-
+    next: "next-page"
 };
 
 /**
@@ -83,6 +80,7 @@ export interface IPopupOptions extends olx.OverlayOptions {
     autoPanAnimation?: {
         // how long should the animation last?
         duration: number;
+        source: any;
     };
     // virtually increases the control width & height by this amount when computing new center point
     autoPanMargin?: number;
@@ -95,7 +93,7 @@ export interface IPopupOptions extends olx.OverlayOptions {
     // one of (bottom|center|top)*(left|center|right), css positioning when updating the rendered position
     positioning?: string;
     // the point coordinate for this overlay
-    position?: number[];
+    position?: [number, number];
 };
 
 /**
@@ -106,6 +104,7 @@ const DEFAULT_OPTIONS: IPopupOptions = {
     insertFirst: true,
     autoPan: true,
     autoPanAnimation: {
+        source: null,
         duration: 250
     },
     positioning: "top-right", // ol.OverlayPositioning.TOP_RIGHT
@@ -135,13 +134,12 @@ export class Popup extends ol.Overlay implements IPopup {
 
     constructor(options = DEFAULT_OPTIONS) {
 
+        options = defaults({}, options, DEFAULT_OPTIONS);
         /**
          * overlays have a map, element, offset, position, positioning
          */
         super(options);
-
-        // options are captured within the overlay constructor so make them accessible from the outside        
-        this.options = defaults({}, options, DEFAULT_OPTIONS);
+        this.options = options;
 
         // the internal properties, dom and listeners are in place, time to create the popup
         this.postCreate();
@@ -183,6 +181,12 @@ export class Popup extends ol.Overlay implements IPopup {
             pageNavigator.on("next", () => pages.next());
         }
 
+        let pages = this.pages = new Paging({ popup: this });
+        let pageNavigator = new PageNavigator({ pages: pages });
+        pageNavigator.hide();
+        pageNavigator.on("prev", () => pages.prev());
+        pageNavigator.on("next", () => pages.next());
+
         {
             let callback = this.setPosition;
             this.setPosition = debounce(args => callback.apply(this, args), 50);
@@ -194,11 +198,23 @@ export class Popup extends ol.Overlay implements IPopup {
         this["dispatchEvent"](new Event(name));
     }
 
-    show(coord: ol.Coordinate, html: string) {
+    show(coord: ol.Coordinate, html: string | HTMLElement) {
+
+        if (html instanceof HTMLElement) {
+            this.content.innerHTML = "";
+            this.content.appendChild(html);
+        } else {
+            this.content.innerHTML = html;
+        }
+        this.domNode.classList.remove("hidden");
+
         this.setPosition(coord);
-        this.content.innerHTML = html;
+
+        this.content.scrollTop = 0;
+
         this.dispatch(eventNames.show);
-        return this;
+
+      return this;
     }
 
     hide() {
@@ -206,6 +222,10 @@ export class Popup extends ol.Overlay implements IPopup {
         this.pages.clear();
         this.dispatch(eventNames.hide);
         return this;
+    }
+
+    isOpened() {
+        return this.domNode.classList.contains("hidden");
     }
 
     detach() {

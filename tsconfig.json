@@ -10,7 +10,6 @@
     "exclude": [
         "node_modules",
         "bower_components",
-        "dist",
-        "index.d.ts"
+        "dist"
     ]
 }

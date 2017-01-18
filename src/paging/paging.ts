@@ -1,5 +1,5 @@
 import ol = require("openlayers");
-import Popup = require("../ol3-popup");
+import { Popup } from "../ol3-popup";
 
 function getInteriorPoint(geom: ol.geom.Geometry) {
     if (geom["getInteriorPoint"]) return (<ol.geom.Point>geom["getInteriorPoint"]()).getCoordinates();
@@ -23,7 +23,7 @@ export class Paging {
     private _activeIndex: number;
     domNode: HTMLDivElement;
 
-    constructor(public options: { popup: Popup.Popup }) {
+    constructor(public options: { popup: Popup }) {
         this._pages = [];
         this.domNode = document.createElement("div");
         this.domNode.classList.add("pages");
@@ -151,3 +151,4 @@ export class Paging {
         (0 < this.activeIndex) && this.goto(this.activeIndex - 1);
     }
 }
+

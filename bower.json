@@ -1,6 +1,6 @@
 {
   "name": "ol3-popup",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "homepage": "https://github.com/ca0v/ol3-popup",
   "authors": [
     "Matt Walker (http://longwayaround.org.uk)",
@@ -33,7 +33,7 @@
     "definition": "index.d.ts"
   },
   "devDependencies": {
-    "openlayers": "https://github.com/openlayers/ol3/releases/download/v3.17.1/v3.17.1-dist.zip",
+    "openlayers": "https://github.com/openlayers/ol3/releases/download/v3.20.1/v3.20.1-dist.zip",
     "requirejs": "^2.2.0",
     "jquery": "^3.1.0"
   }
