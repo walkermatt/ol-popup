@@ -70,11 +70,6 @@ function enableTouchScroll(elm: HTMLElement) {
     }, false);
 }
 
-function getInteriorPoint(geom: ol.geom.Geometry) {
-    if (geom["getInteriorPoint"]) return (<ol.geom.Point>geom["getInteriorPoint"]()).getCoordinates();
-    return ol.extent.getCenter(geom.getExtent());
-}
-
 /**
  * The constructor options 'must' conform
  */
@@ -160,17 +155,14 @@ export class Popup extends ol.Overlay {
         this.domNode.classList.remove("hidden");
 
         this.setPosition(coord);
-
-        this.content.scrollTop = 0;
-
-        this.dispatch("show");
+        this.dispatch(eventNames.show);
         return this;
     }
 
     hide() {
         this.domNode.classList.add("hidden");
         this.pages.clear();
-        this.dispatch("hide");
+        this.dispatch(eventNames.hide);
         return this;
     }
 

@@ -290,11 +290,6 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
             this.scrollTop = scrollStartPos - event.touches[0].pageY;
         }, false);
     }
-    function getInteriorPoint(geom) {
-        if (geom["getInteriorPoint"])
-            return geom["getInteriorPoint"]().getCoordinates();
-        return ol.extent.getCenter(geom.getExtent());
-    }
     ;
     /**
      * Default options for the popup control so it can be created without any contructor arguments
@@ -359,14 +354,13 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
             }
             this.domNode.classList.remove("hidden");
             this.setPosition(coord);
-            this.content.scrollTop = 0;
-            this.dispatch("show");
+            this.dispatch(eventNames.show);
             return this;
         };
         Popup.prototype.hide = function () {
             this.domNode.classList.add("hidden");
             this.pages.clear();
-            this.dispatch("hide");
+            this.dispatch(eventNames.hide);
             return this;
         };
         Popup.prototype.isOpened = function () {
