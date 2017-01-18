@@ -12,7 +12,7 @@ require.config({
     packages: [
         {
             name: 'openlayers',
-            location: 'https://cdnjs.cloudflare.com/ajax/libs/ol3/3.15.1',
+            location: 'https://cdnjs.cloudflare.com/ajax/libs/ol3/3.20.1',
             main: 'ol'
         },
         {
