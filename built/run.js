@@ -392,7 +392,7 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
     }(ol.Overlay));
     exports.Popup = Popup;
 });
-define("extras/feature-creator", ["require", "exports"], function (require, exports) {
+define("extras/feature-creator", ["require", "exports", "openlayers"], function (require, exports, ol) {
     "use strict";
     /**
      * Used for testing, will create features when Alt+Clicking the map
@@ -422,15 +422,12 @@ define("extras/feature-creator", ["require", "exports"], function (require, expo
                     })
                 })
             });
-            var select = new ol.interaction.Select({
-                condition: function (event) {
-                    return ol.events.condition.click(event) && ol.events.condition.altKeyOnly(event);
-                }
-            });
-            map.addInteraction(select);
             map.addLayer(vectorLayer);
-            select.on("select", function (event) {
-                var coord = event.mapBrowserEvent.coordinate;
+            map.on("click", function (event) {
+                if (!ol.events.condition.altKeyOnly(event))
+                    return;
+                event = event["mapBrowserEvent"] || event;
+                var coord = event.coordinate;
                 var geom = new ol.geom.Point(coord);
                 var feature = new ol.Feature({
                     geometry: geom,

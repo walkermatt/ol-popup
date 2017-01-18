@@ -1,3 +1,5 @@
+import ol = require("openlayers");
+
 /**
  * Used for testing, will create features when Alt+Clicking the map
  */
@@ -32,16 +34,13 @@ class FeatureCreator {
             })
         });
 
-        let select = new ol.interaction.Select({
-            condition: (event: ol.MapBrowserEvent) =>
-                ol.events.condition.click(event) && ol.events.condition.altKeyOnly(event)
-        });
-
-        map.addInteraction(select);
         map.addLayer(vectorLayer);
 
-        select.on("select", event => {
-            let coord = event.mapBrowserEvent.coordinate;
+        map.on("click", event => {
+            if (!ol.events.condition.altKeyOnly(event)) return;
+
+            event = event["mapBrowserEvent"] || event;
+            let coord = event.coordinate;
             let geom = new ol.geom.Point(coord);
             let feature = new ol.Feature({
                 geometry: geom,
