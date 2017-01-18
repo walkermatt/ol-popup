@@ -123,6 +123,17 @@ export interface IPopup extends IPopup_2_0_4<Popup> {
 }
     
 /**
+ * This is the contract that will not break between versions
+ */
+export interface IPopup_2_0_4<T> {
+    show(position: ol.Coordinate, markup: string): T;
+    hide(): T;
+}
+
+export interface IPopup extends IPopup_2_0_4<Popup> { 
+}
+    
+/**
  * The control formerly known as ol.Overlay.Popup 
  */
 export class Popup extends ol.Overlay implements IPopup {

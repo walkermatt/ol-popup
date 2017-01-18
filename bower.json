@@ -29,6 +29,9 @@
     "test",
     "*.json"
   ],
+  "typescript": {
+    "definition": "index.d.ts"
+  },
   "devDependencies": {
     "openlayers": "https://github.com/openlayers/ol3/releases/download/v3.20.1/v3.20.1-dist.zip",
     "requirejs": "^2.2.0",
