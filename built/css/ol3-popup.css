@@ -1,0 +1,95 @@
+@charset "UTF-8";
+.ol-popup:after, .ol-popup:before {
+  top: 100%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+  left: 48px; }
+
+.ol-popup {
+  position: absolute;
+  background-color: white;
+  padding: 15px 25px 15px 15px;
+  border: 1px solid #cccccc;
+  border-radius: 12px;
+  bottom: 12px;
+  left: -50px; }
+  .ol-popup:after {
+    border-top-color: white;
+    border-width: 10px;
+    margin-left: -10px; }
+  .ol-popup:before {
+    border-top-color: #cccccc;
+    border-width: 11px;
+    margin-left: -11px; }
+  .ol-popup.marker {
+    margin-bottom: 30px; }
+  .ol-popup.hidden, .ol-popup .hidden {
+    display: none; }
+  .ol-popup.detach {
+    position: initial; }
+    .ol-popup.detach:after {
+      display: none; }
+    .ol-popup.detach:before {
+      display: none; }
+    .ol-popup.detach .ol-popup-closer {
+      position: initial; }
+  .ol-popup div.infoResult {
+    min-width: 130px; }
+    .ol-popup div.infoResult p {
+      padding: 0.1em;
+      margin: 0; }
+  .ol-popup .ol-popup-content {
+    min-width: 170px;
+    max-height: 200px;
+    overflow-x: auto; }
+    .ol-popup .ol-popup-content h3 {
+      margin: 0.25em 0; }
+  .ol-popup .ol-popup-closer {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 150%;
+    padding: 0 4px;
+    color: gray;
+    text-decoration: none; }
+    .ol-popup .ol-popup-closer:after {
+      content: "\2716"; }
+  .ol-popup .pages .page {
+    color: #101010;
+    min-width: 80px;
+    min-height: 80px;
+    margin: 2px;
+    padding: 2px;
+    border: 1px solid gray;
+    border-radius: 4px; }
+  .ol-popup .pagination {
+    color: #101010;
+    min-width: 170px;
+    margin: 4px; }
+    .ol-popup .pagination .arrow {
+      width: 24px;
+      height: 24px; }
+    .ol-popup .pagination .btn-prev::after {
+      content: "⇦"; }
+    .ol-popup .pagination .btn-next::after {
+      content: "⇨"; }
+    .ol-popup .pagination .page-num {
+      color: gray;
+      text-align: center;
+      margin: 4px;
+      -webkit-touch-callout: none;
+      /* iOS Safari */
+      -webkit-user-select: none;
+      /* Chrome/Safari/Opera */
+      -khtml-user-select: none;
+      /* Konqueror */
+      -moz-user-select: none;
+      /* Firefox */
+      -ms-user-select: none;
+      /* Internet Explorer/Edge */
+      user-select: none;
+      /* Non-prefixed version, currently */ }
