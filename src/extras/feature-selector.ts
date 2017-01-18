@@ -1,5 +1,5 @@
 import ol = require("openlayers");
-import Popup = require("../ol3-popup");
+import { Popup } from "../ol3-popup";
 
 /**
  * Interaction which opens the popup when zero or more features are clicked
@@ -8,7 +8,7 @@ class FeatureSelector {
 
     constructor(public options: {
         map: ol.Map;
-        popup: Popup.Popup;
+        popup: Popup;
         title: string;
     }) {
 
