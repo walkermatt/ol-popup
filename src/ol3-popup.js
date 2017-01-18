@@ -314,7 +314,6 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
                 this._activeIndex = index;
                 if (page.location) {
                     this.options.popup.setPosition(page.location);
-                    this.options.popup.panIntoView();
                 }
                 this.dispatch("goto");
             }
@@ -333,13 +332,12 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
      * Default options for the popup control so it can be created without any contructor arguments
      */
     var DEFAULT_OPTIONS = {
+        stopEvent: true,
         insertFirst: true,
-        panMapIfOutOfView: true,
-        ani: ol.animation.pan,
-        ani_opts: {
-            source: null,
-            start: 0,
-            duration: 250
+        autoPan: true,
+        autoPanAnimation: {
+            duration: 250,
+            source: null
         }
     };
     /**
@@ -349,11 +347,9 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
         __extends(Popup, _super);
         function Popup(options) {
             if (options === void 0) { options = DEFAULT_OPTIONS; }
-            _super.call(this, {
-                stopEvent: true,
-                insertFirst: (false !== options.insertFirst ? true : options.insertFirst)
-            });
-            this.options = defaults({}, options, DEFAULT_OPTIONS);
+            options = defaults({}, options, DEFAULT_OPTIONS);
+            _super.call(this, options);
+            this.options = options;
             this.postCreate();
         }
         Popup.prototype.postCreate = function () {
@@ -381,16 +377,20 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
             pageNavigator.hide();
             pageNavigator.on("prev", function () { return pages.prev(); });
             pageNavigator.on("next", function () { return pages.next(); });
-            this.panIntoView = debounce(function () { return _this._panIntoView(); }, 200);
         };
         Popup.prototype.dispatch = function (name) {
             this["dispatchEvent"](new Event(name));
         };
         Popup.prototype.show = function (coord, html) {
-            this.setPosition(coord);
-            this.content.innerHTML = html;
+            if (html instanceof HTMLElement) {
+                this.content.innerHTML = "";
+                this.content.appendChild(html);
+            }
+            else {
+                this.content.innerHTML = html;
+            }
             this.domNode.classList.remove("hidden");
-            this.panIntoView();
+            this.setPosition(coord);
             this.content.scrollTop = 0;
             this.dispatch("show");
             return this;
@@ -400,6 +400,9 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
             this.pages.clear();
             this.dispatch("hide");
             return this;
+        };
+        Popup.prototype.isOpened = function () {
+            return this.domNode.classList.contains("hidden");
         };
         Popup.prototype.detach = function () {
             var _this = this;
@@ -416,45 +419,6 @@ define(["require", "exports", "openlayers"], function (require, exports, ol) {
         };
         Popup.prototype.isDetached = function () {
             return this.domNode.classList.contains(classNames.DETACH);
-        };
-        // to be replaced with a debounced version
-        Popup.prototype.panIntoView = function () {
-            this._panIntoView();
-        };
-        Popup.prototype._panIntoView = function () {
-            var coord = this.getPosition();
-            if (!this.options.panMapIfOutOfView || this.isDetached()) {
-                return;
-            }
-            var popSize = {
-                width: this.getElement().clientWidth + 20,
-                height: this.getElement().clientHeight + 20
-            }, _a = this.getMap().getSize(), mapx = _a[0], mapy = _a[1];
-            var tailHeight = 20, tailOffsetLeft = 60, tailOffsetRight = popSize.width - tailOffsetLeft, popOffset = this.getOffset(), _b = this.getMap().getPixelFromCoordinate(coord), popx = _b[0], popy = _b[1];
-            var fromLeft = (popx - tailOffsetLeft), fromRight = mapx - (popx + tailOffsetRight);
-            var fromTop = popy - popSize.height + popOffset[1], fromBottom = mapy - (popy + tailHeight) - popOffset[1];
-            if (0 >= Math.max(fromLeft, fromRight, fromTop, fromBottom))
-                return;
-            var center = this.getMap().getView().getCenter(), _c = this.getMap().getPixelFromCoordinate(center), x = _c[0], y = _c[1];
-            if (fromRight < 0) {
-                x -= fromRight;
-            }
-            else if (fromLeft < 0) {
-                x += fromLeft;
-            }
-            if (fromTop < 0) {
-                y += fromTop;
-            }
-            else if (fromBottom < 0) {
-                y -= fromBottom;
-            }
-            var ani = this.options.ani;
-            var ani_opts = this.options.ani_opts;
-            if (ani && ani_opts) {
-                ani_opts.source = center;
-                this.getMap().beforeRender(ani(ani_opts));
-            }
-            this.getMap().getView().setCenter(this.getMap().getCoordinateFromPixel([x, y]));
         };
         return Popup;
     }(ol.Overlay));

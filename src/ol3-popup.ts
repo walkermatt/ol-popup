@@ -1,12 +1,5 @@
 /**
  * OpenLayers 3 Popup Overlay.
- * See [the examples](./examples) for usage. Styling can be done via CSS.
- * @constructor
- * @extends {ol.Overlay}
- * @param {Object} opt_options Overlay options, extends olx.OverlayOptions adding:
- *                              **`panMapIfOutOfView`** `Boolean` - Should the
- *                              map be panned so that the popup is entirely
- *                              within view.
  */
 import ol = require("openlayers");
 
@@ -353,7 +346,6 @@ export class Paging {
             this._activeIndex = index;
             if (page.location) {
                 this.options.popup.setPosition(page.location);
-                this.options.popup.panIntoView();
             }
             this.dispatch("goto");
         }
@@ -372,23 +364,18 @@ export class Paging {
  * The constructor options 'must' conform
  */
 export interface IPopupOptions extends olx.OverlayOptions {
-    insertFirst?: boolean;
-    panMapIfOutOfView?: boolean;
-    ani?: (args: any) => ol.PreRenderFunction;
-    ani_opts?: olx.animation.PanOptions;
 };
 
 /**
  * Default options for the popup control so it can be created without any contructor arguments 
  */
 const DEFAULT_OPTIONS: IPopupOptions = {
+    stopEvent: true,
     insertFirst: true,
-    panMapIfOutOfView: true,
-    ani: ol.animation.pan,
-    ani_opts: {
-        source: null,
-        start: 0,
-        duration: 250
+    autoPan: true,
+    autoPanAnimation: {
+        duration: 250,
+        source: null
     }
 }
 
@@ -404,12 +391,9 @@ export class Popup extends ol.Overlay {
 
     constructor(options = DEFAULT_OPTIONS) {
 
-        super({
-            stopEvent: true,
-            insertFirst: (false !== options.insertFirst ? true : options.insertFirst)
-        });
-
-        this.options = defaults({}, options, DEFAULT_OPTIONS);
+        options = defaults({}, options, DEFAULT_OPTIONS);
+        super(options);
+        this.options = options;
         this.postCreate();
     }
 
@@ -444,22 +428,26 @@ export class Popup extends ol.Overlay {
         pageNavigator.hide();
         pageNavigator.on("prev", () => pages.prev());
         pageNavigator.on("next", () => pages.next());
-
-        this.panIntoView = debounce(() => this._panIntoView(), 200);
     }
 
     dispatch(name: string) {
         this["dispatchEvent"](new Event(name));
     }
 
-    show(coord: ol.Coordinate, html: string) {
-        this.setPosition(coord);
+    show(coord: ol.Coordinate, html: string | HTMLElement) {
 
-        this.content.innerHTML = html;
+        if (html instanceof HTMLElement) {
+            this.content.innerHTML = "";
+            this.content.appendChild(html);
+        } else {
+            this.content.innerHTML = html;
+        }
         this.domNode.classList.remove("hidden");
 
-        this.panIntoView();
+        this.setPosition(coord);
+
         this.content.scrollTop = 0;
+
         this.dispatch("show");
         return this;
     }
@@ -469,6 +457,10 @@ export class Popup extends ol.Overlay {
         this.pages.clear();
         this.dispatch("hide");
         return this;
+    }
+
+    isOpened() {
+        return this.domNode.classList.contains("hidden");
     }
 
     detach() {
@@ -487,64 +479,6 @@ export class Popup extends ol.Overlay {
 
     private isDetached() {
         return this.domNode.classList.contains(classNames.DETACH);
-    }
-
-    // to be replaced with a debounced version
-    panIntoView() {
-        this._panIntoView();
-    }
-
-    private _panIntoView() {
-        let coord = this.getPosition();
-        if (!this.options.panMapIfOutOfView || this.isDetached()) {
-            return;
-        }
-
-        let popSize = {
-            width: this.getElement().clientWidth + 20,
-            height: this.getElement().clientHeight + 20
-        },
-            [mapx, mapy] = this.getMap().getSize();
-
-        let tailHeight = 20,
-            tailOffsetLeft = 60,
-            tailOffsetRight = popSize.width - tailOffsetLeft,
-            popOffset = this.getOffset(),
-            [popx, popy] = this.getMap().getPixelFromCoordinate(coord);
-
-        let fromLeft = (popx - tailOffsetLeft),
-            fromRight = mapx - (popx + tailOffsetRight);
-
-        let fromTop = popy - popSize.height + popOffset[1],
-            fromBottom = mapy - (popy + tailHeight) - popOffset[1];
-
-        if (0 >= Math.max(fromLeft, fromRight, fromTop, fromBottom)) return;
-
-        let center = this.getMap().getView().getCenter(),
-            [x, y] = this.getMap().getPixelFromCoordinate(center);
-
-        if (fromRight < 0) {
-            x -= fromRight;
-        } else if (fromLeft < 0) {
-            x += fromLeft;
-        }
-
-        if (fromTop < 0) {
-            y += fromTop;
-        } else if (fromBottom < 0) {
-            y -= fromBottom;
-        }
-
-
-        let ani = this.options.ani;
-        let ani_opts = this.options.ani_opts;
-        if (ani && ani_opts) {
-            ani_opts.source = center;
-            this.getMap().beforeRender(ani(ani_opts));
-        }
-
-        this.getMap().getView().setCenter(this.getMap().getCoordinateFromPixel([x, y]));
-
     }
 
 }
