@@ -163,6 +163,20 @@ define("paging/paging", ["require", "exports", "openlayers"], function (require,
 });
 define("paging/page-navigator", ["require", "exports"], function (require, exports) {
     "use strict";
+    var classNames = {
+        prev: 'btn-prev',
+        next: 'btn-next',
+        hidden: 'hidden',
+        active: 'active',
+        inactive: 'inactive',
+        pagenum: "page-num"
+    };
+    var eventNames = {
+        show: "show",
+        hide: "hide",
+        prev: "prev",
+        next: "next"
+    };
     /**
      * The prior + next paging buttons and current page indicator
      */
@@ -174,12 +188,12 @@ define("paging/page-navigator", ["require", "exports"], function (require, expor
             this.domNode = document.createElement("div");
             this.domNode.classList.add("pagination");
             this.domNode.innerHTML = this.template();
-            this.prevButton = this.domNode.getElementsByClassName("btn-prev")[0];
-            this.nextButton = this.domNode.getElementsByClassName("btn-next")[0];
-            this.pageInfo = this.domNode.getElementsByClassName("page-num")[0];
+            this.prevButton = this.domNode.getElementsByClassName(classNames.prev)[0];
+            this.nextButton = this.domNode.getElementsByClassName(classNames.next)[0];
+            this.pageInfo = this.domNode.getElementsByClassName(classNames.pagenum)[0];
             pages.options.popup.domNode.appendChild(this.domNode);
-            this.prevButton.addEventListener('click', function () { return _this.dispatch('prev'); });
-            this.nextButton.addEventListener('click', function () { return _this.dispatch('next'); });
+            this.prevButton.addEventListener('click', function () { return _this.dispatch(eventNames.prev); });
+            this.nextButton.addEventListener('click', function () { return _this.dispatch(eventNames.next); });
             pages.on("goto", function () { return pages.count > 1 ? _this.show() : _this.hide(); });
             pages.on("clear", function () { return _this.hide(); });
             pages.on("goto", function () {
@@ -187,10 +201,10 @@ define("paging/page-navigator", ["require", "exports"], function (require, expor
                 var count = pages.count;
                 var canPrev = 0 < index;
                 var canNext = count - 1 > index;
-                _this.prevButton.classList.toggle("inactive", !canPrev);
-                _this.prevButton.classList.toggle("active", canPrev);
-                _this.nextButton.classList.toggle("inactive", !canNext);
-                _this.nextButton.classList.toggle("active", canNext);
+                _this.prevButton.classList.toggle(classNames.inactive, !canPrev);
+                _this.prevButton.classList.toggle(classNames.active, canPrev);
+                _this.nextButton.classList.toggle(classNames.inactive, !canNext);
+                _this.nextButton.classList.toggle(classNames.active, canNext);
                 _this.prevButton.disabled = !canPrev;
                 _this.nextButton.disabled = !canNext;
                 _this.pageInfo.innerHTML = (1 + index) + " of " + count;
@@ -206,12 +220,12 @@ define("paging/page-navigator", ["require", "exports"], function (require, expor
             return "<button class=\"arrow btn-prev\"></button><span class=\"page-num\">m of n</span><button class=\"arrow btn-next\"></button>";
         };
         PageNavigator.prototype.hide = function () {
-            this.domNode.classList.add("hidden");
-            this.dispatch("hide");
+            this.domNode.classList.add(classNames.hidden);
+            this.dispatch(eventNames.hide);
         };
         PageNavigator.prototype.show = function () {
-            this.domNode.classList.remove("hidden");
-            this.dispatch("show");
+            this.domNode.classList.remove(classNames.hidden);
+            this.dispatch(eventNames.show);
         };
         return PageNavigator;
     }());
@@ -223,7 +237,8 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
         DETACH: 'detach',
         olPopup: 'ol-popup',
         olPopupCloser: 'ol-popup-closer',
-        olPopupContent: 'ol-popup-content'
+        olPopupContent: 'ol-popup-content',
+        hidden: 'hidden'
     };
     var eventNames = {
         show: "show",
@@ -351,10 +366,15 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
                 pageNavigator.on("prev", function () { return pages_1.prev(); });
                 pageNavigator.on("next", function () { return pages_1.next(); });
             }
-            {
+            if (0) {
                 var callback_1 = this.setPosition;
                 this.setPosition = debounce(function (args) { return callback_1.apply(_this, args); }, 50);
             }
+        };
+        Popup.prototype.destroy = function () {
+            this.getMap().removeOverlay(this);
+            this.dispose();
+            this.dispatch("dispose");
         };
         Popup.prototype.dispatch = function (name) {
             this["dispatchEvent"](new Event(name));
@@ -367,9 +387,8 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
             else {
                 this.content.innerHTML = html;
             }
-            this.domNode.classList.remove("hidden");
+            this.domNode.classList.remove(classNames.hidden);
             this.setPosition(coord);
-            this.content.scrollTop = 0;
             this.dispatch(eventNames.show);
             return this;
         };
@@ -380,7 +399,7 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
             return this;
         };
         Popup.prototype.isOpened = function () {
-            return this.domNode.classList.contains("hidden");
+            return this.domNode.classList.contains(classNames.hidden);
         };
         Popup.prototype.detach = function () {
             var _this = this;
@@ -451,7 +470,7 @@ define("extras/feature-creator", ["require", "exports", "openlayers"], function 
     }());
     return FeatureCreator;
 });
-define("extras/feature-selector", ["require", "exports"], function (require, exports) {
+define("extras/feature-selector", ["require", "exports", "ol3-popup"], function (require, exports, ol3_popup_1) {
     "use strict";
     /**
      * Interaction which opens the popup when zero or more features are clicked
@@ -461,11 +480,14 @@ define("extras/feature-selector", ["require", "exports"], function (require, exp
             var _this = this;
             this.options = options;
             var map = options.map;
+            var popup = options.popup;
             map.on("click", function (event) {
                 console.log("click");
-                var popup = options.popup;
-                var coord = event.coordinate;
                 popup.hide();
+                popup.destroy();
+                popup = new ol3_popup_1.Popup();
+                map.addOverlay(popup);
+                var coord = event.coordinate;
                 popup.show(coord, "<label>" + _this.options.title + "</label>");
                 var pageNum = 1;
                 map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
@@ -517,6 +539,10 @@ define("examples/paging", ["require", "exports", "openlayers", "ol3-popup", "ext
         popup.on("show", function () { return console.log("show popup"); });
         popup.on("hide", function () { return console.log("hide popup"); });
         popup.pages.on("goto", function () { return console.log("goto page: " + popup.pages.activeIndex); });
+        popup.pages.on("goto", function () {
+            // make sure the popup is fully visible
+            popup.getPosition;
+        });
         setTimeout(function () {
             popup.show(center, "<div>Click the map to see a popup</div>");
             var pages = 0;

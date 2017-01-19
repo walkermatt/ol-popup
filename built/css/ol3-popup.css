@@ -1,14 +1,4 @@
 @charset "UTF-8";
-.ol-popup:after {
-  top: 100%;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-  left: 54px; }
-
 .ol-popup {
   position: absolute;
   background-color: white;
@@ -17,6 +7,14 @@
   padding: 4px;
   padding-bottom: 0; }
   .ol-popup:after {
+    top: auto;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    left: 54px;
     border-top-color: white;
     border-width: 10px;
     margin-left: -10px; }
