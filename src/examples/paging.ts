@@ -46,6 +46,9 @@ export function run() {
     popup.on("hide", () => console.log(`hide popup`));
     popup.pages.on("goto", () => console.log(`goto page: ${popup.pages.activeIndex}`));
 
+    [1, 2, 3].map(i => popup.pages.add(`Page ${i}`));
+    popup.pages.goto(0);
+
     setTimeout(() => {
         popup.show(center, "<div>Click the map to see a popup</div>");
         let pages = 0;
@@ -94,31 +97,48 @@ export function run() {
                     });
 
                     console.log("adding a page with a dom-promise");
-                    let version = 1;
-                    popup.pages.add(() => {
-                        let d = $.Deferred();
-                        let div = document.createElement("div");
-                        let markup = `<p>This function promise resolves to a div element, watch the version change 1 second after visiting this page.</p><p>Version: ${version++}</p>`;
-                        setInterval(() => div.innerHTML = `${markup}<p>Timestamp: ${new Date().toISOString()}<p/>`, 100);
-                        setTimeout(() => d.resolve(div), 1000);
-                        return d;
-                    });
+                    {
+                        let message = `
+This function promise resolves to a div element.
+<br/>
+This page was resolved after 3 seconds.  
+<br/>As the content of this page grows, 
+<br/>you should notice that the PanIntoView is continually keeping the popup within view.
+<br/>`;
 
-                    popup.pages.goto(popup.pages.count - 1);
+                        popup.pages.add(() => {
+                            let index = 0;
+                            let d = $.Deferred();
+                            let div = document.createElement("div");
+                            let body = document.createElement("div");
+                            body.appendChild(div);
+
+                            setTimeout(() => d.resolve(body), 3000);
+
+                            d.then(body => {
+                                let h = setInterval(() => {
+                                    div.innerHTML = `<p>${message.substr(0, ++index)}</p>`;
+                                    popup.panIntoView();
+                                    if (index >= message.length) clearInterval(h);
+                                }, 100);
+                            });
+
+                            return d;
+                        });
+                    }
 
                 }, 1000);
             }
             let div = document.createElement("div");
             div.innerHTML = `PAGE ${pages}<br/>${sample_content[pages % sample_content.length]}`;
             popup.pages.add(div);
-            popup.pages.goto(0);
         }, 200);
     }, 500);
 
     let selector = new FeatureSelector({
         map: map,
         popup: popup,
-        title: "Alt+Click creates markers",
+        title: "<b>Alt+Click</b> creates markers",
     });
 
     new FeatureCreator({
