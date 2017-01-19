@@ -1,5 +1,22 @@
 import { Paging } from "./paging";
 
+const classNames = {
+    prev: 'btn-prev',
+    next: 'btn-next',
+    hidden: 'hidden',
+    active: 'active',
+    inactive: 'inactive',
+    pagenum: "page-num"
+};
+
+const eventNames = {
+    show: "show",
+    hide: "hide",
+    prev: "prev",
+    next: "next"
+};
+
+
 /**
  * The prior + next paging buttons and current page indicator
  */
@@ -18,13 +35,13 @@ class PageNavigator {
         this.domNode.classList.add("pagination");
         this.domNode.innerHTML = this.template();
 
-        this.prevButton = <HTMLButtonElement>this.domNode.getElementsByClassName("btn-prev")[0];
-        this.nextButton = <HTMLButtonElement>this.domNode.getElementsByClassName("btn-next")[0];
-        this.pageInfo = <HTMLSpanElement>this.domNode.getElementsByClassName("page-num")[0];
+        this.prevButton = <HTMLButtonElement>this.domNode.getElementsByClassName(classNames.prev)[0];
+        this.nextButton = <HTMLButtonElement>this.domNode.getElementsByClassName(classNames.next)[0];
+        this.pageInfo = <HTMLSpanElement>this.domNode.getElementsByClassName(classNames.pagenum)[0];
 
         pages.options.popup.domNode.appendChild(this.domNode);
-        this.prevButton.addEventListener('click', () => this.dispatch('prev'));
-        this.nextButton.addEventListener('click', () => this.dispatch('next'));
+        this.prevButton.addEventListener('click', () => this.dispatch(eventNames.prev));
+        this.nextButton.addEventListener('click', () => this.dispatch(eventNames.next));
 
         pages.on("goto", () => pages.count > 1 ? this.show() : this.hide());
         pages.on("clear", () => this.hide());
@@ -34,10 +51,10 @@ class PageNavigator {
             let count = pages.count;
             let canPrev = 0 < index;
             let canNext = count - 1 > index;
-            this.prevButton.classList.toggle("inactive", !canPrev);
-            this.prevButton.classList.toggle("active", canPrev);
-            this.nextButton.classList.toggle("inactive", !canNext);
-            this.nextButton.classList.toggle("active", canNext);
+            this.prevButton.classList.toggle(classNames.inactive, !canPrev);
+            this.prevButton.classList.toggle(classNames.active, canPrev);
+            this.nextButton.classList.toggle(classNames.inactive, !canNext);
+            this.nextButton.classList.toggle(classNames.active, canNext);
             this.prevButton.disabled = !canPrev;
             this.nextButton.disabled = !canNext;
             this.pageInfo.innerHTML = `${1 + index} of ${count}`;
@@ -57,13 +74,13 @@ class PageNavigator {
     }
 
     hide() {
-        this.domNode.classList.add("hidden");
-        this.dispatch("hide");
+        this.domNode.classList.add(classNames.hidden);
+        this.dispatch(eventNames.hide);
     }
 
     show() {
-        this.domNode.classList.remove("hidden");
-        this.dispatch("show");
+        this.domNode.classList.remove(classNames.hidden);
+        this.dispatch(eventNames.show);
     }
 }
 

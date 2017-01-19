@@ -18,21 +18,9 @@ $popup-offset: -50px;
 @mixin noselect {
   -webkit-touch-callout: none; /* iOS Safari */
   -webkit-user-select: none;   /* Chrome/Safari/Opera */
-  -khtml-user-select: none;    /* Konqueror */
   -moz-user-select: none;      /* Firefox */
   -ms-user-select: none;       /* Internet Explorer/Edge */
   user-select: none;           /* Non-prefixed version, currently */
-}
-
-%extend_1 {
-	top: 100%;
-	border: solid transparent;
-	content: " ";
-	height: 0;
-	width: 0;
-	position: absolute;
-	pointer-events: none;
-	left: 4px - $popup-offset;
 }
 
 .ol-popup {
@@ -44,7 +32,14 @@ $popup-offset: -50px;
     padding-bottom: 0;
     
 	&:after {
-		@extend %extend_1;
+        top: auto;
+        border: solid transparent;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+        left: 4px - $popup-offset;
 		border-top-color: $background-color;
 		border-width: 10px;
 		margin-left: -10px;

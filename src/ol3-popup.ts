@@ -5,11 +5,12 @@ import ol = require("openlayers");
 import { Paging } from "./paging/paging";
 import PageNavigator = require("./paging/page-navigator");
 
-let classNames = {
+const classNames = {
     DETACH: 'detach',
     olPopup: 'ol-popup',
     olPopupCloser: 'ol-popup-closer',
-    olPopupContent: 'ol-popup-content'
+    olPopupContent: 'ol-popup-content',
+    hidden: 'hidden'
 };
 
 const eventNames = {
@@ -119,20 +120,14 @@ export interface IPopup_2_0_4<T> {
     hide(): T;
 }
 
-export interface IPopup extends IPopup_2_0_4<Popup> { 
-}
-    
-/**
- * This is the contract that will not break between versions
- */
-export interface IPopup_2_0_4<T> {
-    show(position: ol.Coordinate, markup: string): T;
-    hide(): T;
+export interface IPopup_2_0_5<T> extends IPopup_2_0_4<Popup> {
+    isOpened(): boolean;
+    destroy(): void;
 }
 
-export interface IPopup extends IPopup_2_0_4<Popup> { 
+export interface IPopup extends IPopup_2_0_5<Popup> {
 }
-    
+
 /**
  * The control formerly known as ol.Overlay.Popup 
  */
@@ -192,11 +187,17 @@ export class Popup extends ol.Overlay implements IPopup {
             pageNavigator.on("next", () => pages.next());
         }
 
-        {
+        if (0) {
             let callback = this.setPosition;
             this.setPosition = debounce(args => callback.apply(this, args), 50);
         }
 
+    }
+
+    destroy() {
+        this.getMap().removeOverlay(this);
+        this.dispose();
+        this.dispatch("dispose");
     }
 
     dispatch(name: string) {
@@ -211,15 +212,13 @@ export class Popup extends ol.Overlay implements IPopup {
         } else {
             this.content.innerHTML = html;
         }
-        this.domNode.classList.remove("hidden");
+        this.domNode.classList.remove(classNames.hidden);
 
         this.setPosition(coord);
 
-        this.content.scrollTop = 0;
-
         this.dispatch(eventNames.show);
 
-      return this;
+        return this;
     }
 
     hide() {
@@ -230,7 +229,7 @@ export class Popup extends ol.Overlay implements IPopup {
     }
 
     isOpened() {
-        return this.domNode.classList.contains("hidden");
+        return this.domNode.classList.contains(classNames.hidden);
     }
 
     detach() {
