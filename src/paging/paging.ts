@@ -120,6 +120,7 @@ export class Paging {
             if (activeChild) {
                 this.domNode.removeChild(activeChild.element);
             }
+            let d = $.Deferred();
             if (page.callback) {
                 let refreshedContent = page.callback();
                 $.when(refreshedContent).then(v => {
@@ -132,14 +133,20 @@ export class Paging {
                     } else {
                         throw `invalid callback result: ${v}`;
                     }
+                    d.resolve();
                 });
+            } else {
+                d.resolve();
             }
-            this.domNode.appendChild(page.element);
-            this._activeIndex = index;
-            if (page.location) {
-                this.options.popup.setPosition(page.location);
-            }
-            this.dispatch("goto");
+
+            d.then(() => {
+                this.domNode.appendChild(page.element);
+                this._activeIndex = index;
+                if (page.location) {
+                    this.options.popup.setPosition(page.location);
+                }
+                this.dispatch("goto");
+            });
         }
     }
 

@@ -120,12 +120,14 @@ define("paging/paging", ["require", "exports", "openlayers"], function (require,
             }
         };
         Paging.prototype.goto = function (index) {
+            var _this = this;
             var page = this._pages[index];
             if (page) {
                 var activeChild = this._activeIndex >= 0 && this._pages[this._activeIndex];
                 if (activeChild) {
                     this.domNode.removeChild(activeChild.element);
                 }
+                var d_1 = $.Deferred();
                 if (page.callback) {
                     var refreshedContent = page.callback();
                     $.when(refreshedContent).then(function (v) {
@@ -141,14 +143,20 @@ define("paging/paging", ["require", "exports", "openlayers"], function (require,
                         else {
                             throw "invalid callback result: " + v;
                         }
+                        d_1.resolve();
                     });
                 }
-                this.domNode.appendChild(page.element);
-                this._activeIndex = index;
-                if (page.location) {
-                    this.options.popup.setPosition(page.location);
+                else {
+                    d_1.resolve();
                 }
-                this.dispatch("goto");
+                d_1.then(function () {
+                    _this.domNode.appendChild(page.element);
+                    _this._activeIndex = index;
+                    if (page.location) {
+                        _this.options.popup.setPosition(page.location);
+                    }
+                    _this.dispatch("goto");
+                });
             }
         };
         Paging.prototype.next = function () {
@@ -541,6 +549,8 @@ define("examples/paging", ["require", "exports", "openlayers", "ol3-popup", "ext
         popup.on("show", function () { return console.log("show popup"); });
         popup.on("hide", function () { return console.log("hide popup"); });
         popup.pages.on("goto", function () { return console.log("goto page: " + popup.pages.activeIndex); });
+        [1, 2, 3].map(function (i) { return popup.pages.add("Page " + i); });
+        popup.pages.goto(0);
         setTimeout(function () {
             popup.show(center, "<div>Click the map to see a popup</div>");
             var pages = 0;
@@ -583,28 +593,37 @@ define("examples/paging", ["require", "exports", "openlayers", "ol3-popup", "ext
                             return d;
                         });
                         console.log("adding a page with a dom-promise");
-                        var version = 1;
-                        popup.pages.add(function () {
-                            var d = $.Deferred();
-                            var div = document.createElement("div");
-                            var markup = "<p>This function promise resolves to a div element, watch the version change 1 second after visiting this page.</p><p>Version: " + version++ + "</p>";
-                            setInterval(function () { return div.innerHTML = markup + "<p>Timestamp: " + new Date().toISOString() + "<p/>"; }, 100);
-                            setTimeout(function () { return d.resolve(div); }, 1000);
-                            return d;
-                        });
-                        popup.pages.goto(popup.pages.count - 1);
+                        {
+                            var message_1 = "\nThis function promise resolves to a div element.\n<br/>\nThis page was resolved after 3 seconds.  \n<br/>As the content of this page grows, \n<br/>you should notice that the PanIntoView is continually keeping the popup within view.\n<br/>";
+                            popup.pages.add(function () {
+                                var index = 0;
+                                var d = $.Deferred();
+                                var div = document.createElement("div");
+                                var body = document.createElement("div");
+                                body.appendChild(div);
+                                setTimeout(function () { return d.resolve(body); }, 3000);
+                                d.then(function (body) {
+                                    var h = setInterval(function () {
+                                        div.innerHTML = "<p>" + message_1.substr(0, ++index) + "</p>";
+                                        popup.panIntoView();
+                                        if (index >= message_1.length)
+                                            clearInterval(h);
+                                    }, 100);
+                                });
+                                return d;
+                            });
+                        }
                     }, 1000);
                 }
                 var div = document.createElement("div");
                 div.innerHTML = "PAGE " + pages + "<br/>" + sample_content[pages % sample_content.length];
                 popup.pages.add(div);
-                popup.pages.goto(0);
             }, 200);
         }, 500);
         var selector = new FeatureSelector({
             map: map,
             popup: popup,
-            title: "Alt+Click creates markers",
+            title: "<b>Alt+Click</b> creates markers",
         });
         new FeatureCreator({
             map: map
