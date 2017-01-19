@@ -365,11 +365,16 @@ define("ol3-popup", ["require", "exports", "openlayers", "paging/paging", "pagin
                 pageNavigator.hide();
                 pageNavigator.on("prev", function () { return pages_1.prev(); });
                 pageNavigator.on("next", function () { return pages_1.next(); });
+                pages_1.on("goto", function () { return _this.panIntoView(); });
             }
             if (0) {
                 var callback_1 = this.setPosition;
                 this.setPosition = debounce(function (args) { return callback_1.apply(_this, args); }, 50);
             }
+        };
+        Popup.prototype.panIntoView = function () {
+            var _a = this.getPosition(), x = _a[0], y = _a[1];
+            this.setPosition([x, y]);
         };
         Popup.prototype.destroy = function () {
             this.getMap().removeOverlay(this);
@@ -470,7 +475,7 @@ define("extras/feature-creator", ["require", "exports", "openlayers"], function 
     }());
     return FeatureCreator;
 });
-define("extras/feature-selector", ["require", "exports", "ol3-popup"], function (require, exports, ol3_popup_1) {
+define("extras/feature-selector", ["require", "exports"], function (require, exports) {
     "use strict";
     /**
      * Interaction which opens the popup when zero or more features are clicked
@@ -480,14 +485,11 @@ define("extras/feature-selector", ["require", "exports", "ol3-popup"], function 
             var _this = this;
             this.options = options;
             var map = options.map;
-            var popup = options.popup;
             map.on("click", function (event) {
                 console.log("click");
-                popup.hide();
-                popup.destroy();
-                popup = new ol3_popup_1.Popup();
-                map.addOverlay(popup);
+                var popup = options.popup;
                 var coord = event.coordinate;
+                popup.hide();
                 popup.show(coord, "<label>" + _this.options.title + "</label>");
                 var pageNum = 1;
                 map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
@@ -539,10 +541,6 @@ define("examples/paging", ["require", "exports", "openlayers", "ol3-popup", "ext
         popup.on("show", function () { return console.log("show popup"); });
         popup.on("hide", function () { return console.log("hide popup"); });
         popup.pages.on("goto", function () { return console.log("goto page: " + popup.pages.activeIndex); });
-        popup.pages.on("goto", function () {
-            // make sure the popup is fully visible
-            popup.getPosition;
-        });
         setTimeout(function () {
             popup.show(center, "<div>Click the map to see a popup</div>");
             var pages = 0;

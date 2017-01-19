@@ -123,6 +123,7 @@ export interface IPopup_2_0_4<T> {
 export interface IPopup_2_0_5<T> extends IPopup_2_0_4<Popup> {
     isOpened(): boolean;
     destroy(): void;
+    panIntoView(): void;
 }
 
 export interface IPopup extends IPopup_2_0_5<Popup> {
@@ -185,6 +186,7 @@ export class Popup extends ol.Overlay implements IPopup {
             pageNavigator.hide();
             pageNavigator.on("prev", () => pages.prev());
             pageNavigator.on("next", () => pages.next());
+            pages.on("goto", () => this.panIntoView());
         }
 
         if (0) {
@@ -192,6 +194,11 @@ export class Popup extends ol.Overlay implements IPopup {
             this.setPosition = debounce(args => callback.apply(this, args), 50);
         }
 
+    }
+
+    panIntoView() {
+        let [x, y] = this.getPosition();
+        this.setPosition([x, y]);
     }
 
     destroy() {
