@@ -41,9 +41,8 @@ ol.Overlay.Popup = function(opt_options) {
     // Apply workaround to enable scrolling of content div on touch devices
     ol.Overlay.Popup.enableTouchScroll_(this.content);
 
-    ol.Overlay.call(this, Object.assign(options, {
-        element: this.container
-    }));
+    options.element = this.container;
+    ol.Overlay.call(this, options);
 
 };
 
