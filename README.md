@@ -1,6 +1,6 @@
-# OpenLayers 3 Popup
+# OpenLayers Popup
 
-Basic popup overlay for an [OL3](https://github.com/openlayers/ol3) map. By
+Basic popup overlay for an [OL](https://github.com/openlayers/openlayers) map. By
 default the map is centred so that the popup is entirely visible.
 
 ## Examples
