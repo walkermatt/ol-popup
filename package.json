@@ -11,14 +11,15 @@
       "Avi Kelman <patcherton.fixesthings@gmail.com>"
   ],
   "license": "MIT",
+  "browser": "src/ol3-popup.js",
   "bugs": {
     "url": "https://github.com/walkermatt/ol3-popup/issues"
   },
   "scripts": {
     "doc": "node_modules/.bin/jsdoc --explain src/ol3-popup.js | node_modules/.bin/dirtydocs util/README.md > README.md"
   },
-  "dependencies": {
-    "openlayers": "~4.2.0"
+  "peerDependencies": {
+    "openlayers": ">=3"
   },
   "devDependencies": {
     "jsdoc": "~3.3.0-beta1",
