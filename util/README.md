@@ -7,13 +7,13 @@ default the map is centred so that the popup is entirely visible.
 
 The examples demonstrate usage and can be viewed online thanks to [RawGit](http://rawgit.com/):
 
-* [Basic usage](http://rawgit.com/walkermatt/ol3-popup/master/examples/popup.html)
+* [Basic usage](http://rawgit.com/walkermatt/ol-popup/master/examples/popup.html)
     * Create a popup instance, show it on single-click specifying the content
-* [DOM Events](http://rawgit.com/walkermatt/ol3-popup/master/examples/dom-events.html)
+* [DOM Events](http://rawgit.com/walkermatt/ol-popup/master/examples/dom-events.html)
     * Handle DOM events triggered by interacting with elements within the popup content
-* [Scroll](http://rawgit.com/walkermatt/ol3-popup/master/examples/scroll.html)
+* [Scroll](http://rawgit.com/walkermatt/ol-popup/master/examples/scroll.html)
     * Controlling popup dimensions and scrolling overflowing content
-* [Multiple popups](http://rawgit.com/walkermatt/ol3-popup/master/examples/multiple.html)
+* [Multiple popups](http://rawgit.com/walkermatt/ol-popup/master/examples/multiple.html)
     * Add a new popup each time the maps is clicked
 
 The source for all examples can be found in [examples](examples).
@@ -58,7 +58,7 @@ The source for all examples can be found in [examples](examples).
 
 ## Contributing
 
-Contributions are welcome, please [create an issue](https://github.com/walkermatt/ol3-popup/issues) first to discuss any potential contributions.
+Contributions are welcome, please [create an issue](https://github.com/walkermatt/ol-popup/issues) first to discuss any potential contributions.
 
 ### Updating README.md
 
