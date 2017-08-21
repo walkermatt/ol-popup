@@ -18,6 +18,44 @@ The examples demonstrate usage and can be viewed online thanks to [RawGit](http:
 
 The source for all examples can be found in [examples](examples).
 
+## Install
+
+### Browser
+
+#### JS
+
+Load `ol-popup.js` after OpenLayers. The popup overlay is available as `ol.Overlay.Popup`.
+
+```HTML
+<script src="https://unpkg.com/ol-popup@2.0.0"></script>
+```
+
+#### CSS
+
+```HTML
+<link rel="stylesheet" href="https://unpkg.com/ol-popup@2.0.0/src/ol-popup.css" />
+```
+
+### NPM/ Browserify
+
+NPM package: [ol-popup](https://www.npmjs.com/package/ol-popup).
+
+#### JS
+
+Install the package via `npm`
+
+    npm install ol-popup --save
+
+If you're using Browserify you need to `require` `ol-popup`
+
+    var Popup = require("ol-popup");
+    popup = new Popup();
+    map.addOverlay(popup);
+
+#### CSS
+
+The CSS file `ol-popup.css` can be found in `node_modules/ol-popup/src`
+
 ## API
 
 {% for class in classes -%}
