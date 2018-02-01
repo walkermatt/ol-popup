@@ -1,20 +1,15 @@
-(function (root, factory) {
-  if(typeof define === "function" && define.amd) {
-    define(["openlayers"], factory);
-  } else if(typeof module === "object" && module.exports) {
-    module.exports = factory(require("openlayers"));
-  } else {
-    root.LayerSwitcher = factory(root.ol);
-  }
-}(this, function(ol) {
-    /**
-    * OpenLayers 3 Popup Overlay.
-    * See [the examples](./examples) for usage. Styling can be done via CSS.
-    * @constructor
-    * @extends {ol.Overlay}
-    * @param {Object} opt_options Overlay options
-    */
-    ol.Overlay.Popup = function(opt_options) {
+import Overlay from 'ol/overlay/overlay';
+
+/**
+* OpenLayers 3 Popup Overlay.
+* See [the examples](./examples) for usage. Styling can be done via CSS.
+* @constructor
+* @extends {ol.Overlay}
+* @param {Object} opt_options Overlay options
+*/
+export default class Popup extends Overlay {
+
+    constructor(opt_options) {
 
         var options = opt_options || {};
 
@@ -28,7 +23,12 @@
             };
         }
 
-        this.container = document.createElement('div');
+        var element = document.createElement('div');
+
+        options.element = element;
+        super(options);
+
+        this.container = element;
         this.container.className = 'ol-popup';
 
         this.closer = document.createElement('a');
@@ -48,21 +48,16 @@
         this.container.appendChild(this.content);
 
         // Apply workaround to enable scrolling of content div on touch devices
-        ol.Overlay.Popup.enableTouchScroll_(this.content);
+        Popup.enableTouchScroll_(this.content);
 
-        options.element = this.container;
-        ol.Overlay.call(this, options);
-
-    };
-
-    ol.inherits(ol.Overlay.Popup, ol.Overlay);
+    }
 
     /**
     * Show the popup.
     * @param {ol.Coordinate} coord Where to anchor the popup.
     * @param {String|HTMLElement} html String or element of HTML to display within the popup.
     */
-    ol.Overlay.Popup.prototype.show = function(coord, html) {
+    show(coord, html) {
         if (html instanceof HTMLElement) {
             this.content.innerHTML = "";
             this.content.appendChild(html);
@@ -73,29 +68,29 @@
         this.content.scrollTop = 0;
         this.setPosition(coord);
         return this;
-    };
+    }
 
     /**
     * @private
     * @desc Determine if the current browser supports touch events. Adapted from
     * https://gist.github.com/chrismbarr/4107472
     */
-    ol.Overlay.Popup.isTouchDevice_ = function() {
+    static isTouchDevice_() {
         try {
             document.createEvent("TouchEvent");
             return true;
         } catch(e) {
             return false;
         }
-    };
+    }
 
     /**
     * @private
     * @desc Apply workaround to enable scrolling of overflowing content within an
     * element. Adapted from https://gist.github.com/chrismbarr/4107472
     */
-    ol.Overlay.Popup.enableTouchScroll_ = function(elm) {
-        if(ol.Overlay.Popup.isTouchDevice_()){
+    static enableTouchScroll_(elm) {
+        if(Popup.isTouchDevice_()){
             var scrollStartPos = 0;
             elm.addEventListener("touchstart", function(event) {
                 scrollStartPos = this.scrollTop + event.touches[0].pageY;
@@ -104,25 +99,28 @@
                 this.scrollTop = scrollStartPos - event.touches[0].pageY;
             }, false);
         }
-    };
+    }
 
     /**
     * Hide the popup.
     */
-    ol.Overlay.Popup.prototype.hide = function() {
+    hide() {
         this.container.style.display = 'none';
         return this;
-    };
+    }
 
 
     /**
     * Indicates if the popup is in open state
     */
-    ol.Overlay.Popup.prototype.isOpened = function() {
+    isOpened() {
         return this.container.style.display == 'block';
-    };
+    }
 
-    var Popup = ol.Overlay.Popup;
-    return Popup;
+}
 
-}));
+// Expose Popup as ol.Overlay.Popup if using a full build of
+// OpenLayers
+if (window.ol && window.ol.Overlay) {
+    window.ol.Overlay.Popup = Popup;
+}

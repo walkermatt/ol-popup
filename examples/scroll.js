@@ -11,7 +11,7 @@ var map = new ol.Map({
     })
 });
 
-var popup = new ol.Overlay.Popup();
+var popup = new Popup();
 map.addOverlay(popup);
 
 map.on('singleclick', function(evt) {
