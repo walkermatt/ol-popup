@@ -2,6 +2,7 @@
   "name": "ol-popup",
   "version": "2.0.0",
   "description": "Popup overlay for OpenLayers",
+  "main": "dist/ol-popup.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/walkermatt/ol-popup.git"
