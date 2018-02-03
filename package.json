@@ -12,7 +12,6 @@
     "Avi Kelman <patcherton.fixesthings@gmail.com>"
   ],
   "license": "MIT",
-  "browser": "src/ol-popup.js",
   "bugs": {
     "url": "https://github.com/walkermatt/ol-popup/issues"
   },
