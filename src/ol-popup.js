@@ -1,4 +1,4 @@
-import Overlay from 'ol/overlay/overlay';
+import Overlay from 'ol/overlay';
 
 /**
 * OpenLayers 3 Popup Overlay.

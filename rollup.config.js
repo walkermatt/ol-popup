@@ -21,6 +21,6 @@ module.exports = {
     },
     globals: {
         'ol/map': 'ol.Map',
-        'ol/overlay/overlay': 'ol.Overlay'
+        'ol/overlay': 'ol.Overlay'
     }
 };
