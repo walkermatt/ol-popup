@@ -17,7 +17,7 @@
   },
   "scripts": {
     "build": "rollup --config rollup.config.js",
-    "doc": "node_modules/.bin/jsdoc --explain src/ol-popup.js | node_modules/.bin/dirtydocs util/README.md > README.md"
+    "doc": "documentation readme src/ol-popup.js --section=API"
   },
   "peerDependencies": {
     "ol": ">4.0.1"
@@ -30,6 +30,7 @@
     "rollup": "^0.41.4",
     "rollup-plugin-babel": "^3.0.3",
     "rollup-plugin-commonjs": "^7.0.0",
-    "rollup-plugin-node-resolve": "^2.0.0"
+    "rollup-plugin-node-resolve": "^2.0.0",
+    "documentation": "^5.3.5"
   }
 }

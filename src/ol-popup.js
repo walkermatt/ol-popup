@@ -5,7 +5,8 @@ import Overlay from 'ol/overlay';
 * See [the examples](./examples) for usage. Styling can be done via CSS.
 * @constructor
 * @extends {ol.Overlay}
-* @param {Object} opt_options Overlay options
+* @param {olx.OverlayOptions} opt_options options as defined by ol.Overlay. Defaults to
+* `{autoPan: true, autoPanAnimation: {duration: 250}}`
 */
 export default class Popup extends Overlay {
 
@@ -56,6 +57,7 @@ export default class Popup extends Overlay {
     * Show the popup.
     * @param {ol.Coordinate} coord Where to anchor the popup.
     * @param {String|HTMLElement} html String or element of HTML to display within the popup.
+    * @returns {Popup} The Popup instance
     */
     show(coord, html) {
         if (html instanceof HTMLElement) {
@@ -103,6 +105,7 @@ export default class Popup extends Overlay {
 
     /**
     * Hide the popup.
+    * @returns {Popup} The Popup instance
     */
     hide() {
         this.container.style.display = 'none';
@@ -112,6 +115,7 @@ export default class Popup extends Overlay {
 
     /**
     * Indicates if the popup is in open state
+    * @returns {Boolean} Whether the popup instance is open
     */
     isOpened() {
         return this.container.style.display == 'block';
