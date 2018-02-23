@@ -15,6 +15,8 @@ The examples demonstrate usage and can be viewed online thanks to [RawGit](http:
     -   Controlling popup dimensions and scrolling overflowing content
 -   [Multiple popups](http://rawgit.com/walkermatt/ol-popup/master/examples/multiple.html)
     -   Add a new popup each time the maps is clicked
+-   [Bundling with `ol` package (Browserify, Parcel, Webpack...)](https://github.com/walkermatt/ol-popup-examples)
+    -   To use the popup with the [`ol` package](https://www.npmjs.com/package/ol) and a module bundler such as Browserify, Parcel, Webpack etc. see [ol-popup-examples](https://github.com/walkermatt/ol-popup-examples).
 
 The source for all examples can be found in [examples](examples).
 
@@ -71,7 +73,7 @@ The CSS file `ol-popup.css` can be found in `node_modules/ol-popup/src`
 
 **Extends ol.Overlay**
 
-OpenLayers 3 Popup Overlay.
+OpenLayers Popup Overlay.
 See [the examples](./examples) for usage. Styling can be done via CSS.
 
 **Parameters**
@@ -108,9 +110,7 @@ Contributions are welcome, please [create an issue](https://github.com/walkermat
 
 ### Updating README.md
 
-`README.md` is generated from the [JSDoc](http://usejsdoc.org/) comments in the source code and the template `util/README.md`. To update the API docs edit the comments in the code; to update the other text edit the template (`util/README.md`).
-
-Once you've made edits run the following which will recreate `README.md` using the JSDoc comments and template:
+The API section of the `README.md` is generated from the [JSDoc](http://usejsdoc.org/) comments in the source code. To update the API docs edit the comments in the code then run:
 
     npm run doc
 
@@ -130,4 +130,4 @@ Based on an example by [Tim Schaub](https://github.com/tschaub) posted on the
 ## Also see
 
 If you find the popup useful you might also like the
-[ol3-layerswitcher](https://github.com/walkermatt/ol3-layerswitcher).
+[ol-layerswitcher](https://github.com/walkermatt/ol-layerswitcher).

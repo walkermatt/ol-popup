@@ -73,11 +73,12 @@ var possibleConstructorReturn = function (self, call) {
 };
 
 /**
-* OpenLayers 3 Popup Overlay.
+* OpenLayers Popup Overlay.
 * See [the examples](./examples) for usage. Styling can be done via CSS.
 * @constructor
 * @extends {ol.Overlay}
-* @param {Object} opt_options Overlay options
+* @param {olx.OverlayOptions} opt_options options as defined by ol.Overlay. Defaults to
+* `{autoPan: true, autoPanAnimation: {duration: 250}}`
 */
 
 var Popup = function (_Overlay) {
@@ -134,6 +135,7 @@ var Popup = function (_Overlay) {
     * Show the popup.
     * @param {ol.Coordinate} coord Where to anchor the popup.
     * @param {String|HTMLElement} html String or element of HTML to display within the popup.
+    * @returns {Popup} The Popup instance
     */
 
 
@@ -164,6 +166,7 @@ var Popup = function (_Overlay) {
 
         /**
         * Hide the popup.
+        * @returns {Popup} The Popup instance
         */
         value: function hide() {
             this.container.style.display = 'none';
@@ -172,6 +175,7 @@ var Popup = function (_Overlay) {
 
         /**
         * Indicates if the popup is in open state
+        * @returns {Boolean} Whether the popup instance is open
         */
 
     }, {

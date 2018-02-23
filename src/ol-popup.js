@@ -1,7 +1,7 @@
 import Overlay from 'ol/overlay';
 
 /**
-* OpenLayers 3 Popup Overlay.
+* OpenLayers Popup Overlay.
 * See [the examples](./examples) for usage. Styling can be done via CSS.
 * @constructor
 * @extends {ol.Overlay}
