@@ -7,7 +7,7 @@
   ],
   "description": "Popup overlay for OpenLayers",
   "main": [
-    "src/ol-popup.js",
+    "dist/ol-popup.js",
     "src/ol-popup.css"
   ],
   "keywords": [
@@ -15,6 +15,7 @@
     "ol",
     "ol3",
     "ol4",
+    "ol5",
     "overlay",
     "popup",
     "info"
