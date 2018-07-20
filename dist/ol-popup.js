@@ -1,6 +1,6 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('ol/overlay')) :
-	typeof define === 'function' && define.amd ? define(['ol/overlay'], factory) :
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('ol/Overlay')) :
+	typeof define === 'function' && define.amd ? define(['ol/Overlay'], factory) :
 	(global.Popup = factory(global.ol.Overlay));
 }(this, (function (Overlay) { 'use strict';
 

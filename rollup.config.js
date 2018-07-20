@@ -20,7 +20,7 @@ module.exports = {
         return /ol\//.test(id);
     },
     globals: {
-        'ol/map': 'ol.Map',
-        'ol/overlay': 'ol.Overlay'
+        'ol/Map': 'ol.Map',
+        'ol/Overlay': 'ol.Overlay'
     }
 };
