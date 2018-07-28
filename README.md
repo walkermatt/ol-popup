@@ -1,7 +1,11 @@
 # OpenLayers Popup
 
-Basic popup overlay for an [OL](https://github.com/openlayers/openlayers) map. By
+Basic popup overlay for an ['ol'](https://github.com/openlayers/openlayers) map. By
 default the map is centred so that the popup is entirely visible.
+
+Compatible with OpenLayers version 3, 4 and 5 (see note in [Install - Parcel,
+Webpack etc.](#parcel-webpack-etc) regarding installing the appropriate version
+of `ol-popup` for OpenLayers).
 
 ## Examples
 
@@ -15,8 +19,8 @@ The examples demonstrate usage and can be viewed online thanks to [RawGit](http:
     -   Controlling popup dimensions and scrolling overflowing content
 -   [Multiple popups](http://rawgit.com/walkermatt/ol-popup/master/examples/multiple.html)
     -   Add a new popup each time the maps is clicked
--   [Bundling with `ol` package (Browserify, Parcel, Webpack...)](https://github.com/walkermatt/ol-popup-examples)
-    -   To use the popup with the [`ol` package](https://www.npmjs.com/package/ol) and a module bundler such as Browserify, Parcel, Webpack etc. see [ol-popup-examples](https://github.com/walkermatt/ol-popup-examples).
+-   [Bundling with `ol` package (Parcel, Webpack...)](https://github.com/walkermatt/ol-popup-examples)
+    -   To use the popup with the [`ol` package](https://www.npmjs.com/package/ol) and a module bundler such as Parcel, Webpack etc. see [ol-popup-examples](https://github.com/walkermatt/ol-popup-examples).
 
 The source for all examples can be found in [examples](examples).
 
@@ -29,16 +33,16 @@ The source for all examples can be found in [examples](examples).
 Load `ol-popup.js` after OpenLayers. The popup overlay is available as `Popup` or `ol.Overlay.Popup`.
 
 ```HTML
-<script src="https://unpkg.com/ol-popup@3.0.0"></script>
+<script src="https://unpkg.com/ol-popup@4.0.0"></script>
 ```
 
 #### CSS
 
 ```HTML
-<link rel="stylesheet" href="https://unpkg.com/ol-popup@3.0.0/src/ol-popup.css" />
+<link rel="stylesheet" href="https://unpkg.com/ol-popup@4.0.0/src/ol-popup.css" />
 ```
 
-### Browserify, Parcel, Webpack
+### Parcel, Webpack etc.
 
 NPM package: [ol-popup](https://www.npmjs.com/package/ol-popup).
 
@@ -48,11 +52,13 @@ Install the package via `npm`
 
     npm install ol-popup --save
 
+:warning: If you're using the [`ol` package](https://www.npmjs.com/package/ol) prior to v5 you'll need to install `ol-popup@v3.0.0`.
+
 #### CSS
 
-The CSS file `ol-popup.css` can be found in `node_modules/ol-popup/src`
+The CSS file `ol-popup.css` can be found in `./node_modules/ol-popup/src`
 
-To use the popup with the [`ol` package](https://www.npmjs.com/package/ol) and a module bundler such as Browserify, Parcel, Webpack etc. see [ol-popup-examples](https://github.com/walkermatt/ol-popup-examples).
+To use the popup with the [`ol` package](https://www.npmjs.com/package/ol) and a module bundler such as Parcel, Webpack etc. see [ol-popup-examples](https://github.com/walkermatt/ol-popup-examples).
 
 ## API
 
