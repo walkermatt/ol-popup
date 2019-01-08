@@ -9,15 +9,15 @@ of `ol-popup` for OpenLayers).
 
 ## Examples
 
-The examples demonstrate usage and can be viewed online thanks to [RawGit](http://rawgit.com/):
+The examples demonstrate usage and can be viewed online thanks to [raw.githack.com](http://raw.githack.com/):
 
--   [Basic usage](http://rawgit.com/walkermatt/ol-popup/master/examples/popup.html)
+-   [Basic usage](http://raw.githack.com/walkermatt/ol-popup/master/examples/popup.html)
     -   Create a popup instance, show it on single-click specifying the content
--   [DOM Events](http://rawgit.com/walkermatt/ol-popup/master/examples/dom-events.html)
+-   [DOM Events](http://raw.githack.com/walkermatt/ol-popup/master/examples/dom-events.html)
     -   Handle DOM events triggered by interacting with elements within the popup content
--   [Scroll](http://rawgit.com/walkermatt/ol-popup/master/examples/scroll.html)
+-   [Scroll](http://raw.githack.com/walkermatt/ol-popup/master/examples/scroll.html)
     -   Controlling popup dimensions and scrolling overflowing content
--   [Multiple popups](http://rawgit.com/walkermatt/ol-popup/master/examples/multiple.html)
+-   [Multiple popups](http://raw.githack.com/walkermatt/ol-popup/master/examples/multiple.html)
     -   Add a new popup each time the maps is clicked
 -   [Bundling with `ol` package (Parcel, Webpack...)](https://github.com/walkermatt/ol-popup-examples)
     -   To use the popup with the [`ol` package](https://www.npmjs.com/package/ol) and a module bundler such as Parcel, Webpack etc. see [ol-popup-examples](https://github.com/walkermatt/ol-popup-examples).
