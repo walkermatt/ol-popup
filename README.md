@@ -3,7 +3,7 @@
 Basic popup overlay for an ['ol'](https://github.com/openlayers/openlayers) map. By
 default the map is centred so that the popup is entirely visible.
 
-Compatible with OpenLayers version 3, 4 and 5 (see note in [Install - Parcel,
+Compatible with OpenLayers version 3, 4, 5 and 6 (see note in [Install - Parcel,
 Webpack etc.](#parcel-webpack-etc) regarding installing the appropriate version
 of `ol-popup` for OpenLayers).
 
