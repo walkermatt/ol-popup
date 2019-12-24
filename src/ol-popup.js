@@ -41,6 +41,10 @@ export default class Popup extends Overlay {
         this.closer.addEventListener('click', function(evt) {
             that.container.style.display = 'none';
             that.closer.blur();
+            //create close event for popup
+            var event = new Event('close');
+            that.dispatchEvent(event);
+         
             evt.preventDefault();
         }, false);
 
