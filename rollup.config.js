@@ -1,5 +1,3 @@
-import babel from 'rollup-plugin-babel';
-
 module.exports = {
     entry: 'src/ol-popup.js',
     targets: [
@@ -11,10 +9,7 @@ module.exports = {
     ],
     plugins: [
         require('rollup-plugin-node-resolve')(),
-        require('rollup-plugin-commonjs')(),
-        babel({
-            exclude: 'node_modules/**' // only transpile our source code
-        })
+        require('rollup-plugin-commonjs')()
     ],
     external: function(id) {
         return /ol\//.test(id);
