@@ -1,6 +1,6 @@
 {
   "name": "ol-popup",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "description": "Popup overlay for OpenLayers",
   "main": "dist/ol-popup.js",
   "repository": {
