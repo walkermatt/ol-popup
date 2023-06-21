@@ -11,16 +11,16 @@ of `ol-popup` for OpenLayers).
 
 The examples demonstrate usage and can be viewed online thanks to [raw.githack.com](http://raw.githack.com/):
 
--   [Basic usage](http://raw.githack.com/walkermatt/ol-popup/master/examples/popup.html)
-    -   Create a popup instance, show it on single-click specifying the content
--   [DOM Events](http://raw.githack.com/walkermatt/ol-popup/master/examples/dom-events.html)
-    -   Handle DOM events triggered by interacting with elements within the popup content
--   [Scroll](http://raw.githack.com/walkermatt/ol-popup/master/examples/scroll.html)
-    -   Controlling popup dimensions and scrolling overflowing content
--   [Multiple popups](http://raw.githack.com/walkermatt/ol-popup/master/examples/multiple.html)
-    -   Add a new popup each time the maps is clicked
--   [Bundling with `ol` package (Parcel, Webpack...)](https://github.com/walkermatt/ol-popup-examples)
-    -   To use the popup with the [`ol` package](https://www.npmjs.com/package/ol) and a module bundler such as Parcel, Webpack etc. see [ol-popup-examples](https://github.com/walkermatt/ol-popup-examples).
+*   [Basic usage](http://raw.githack.com/walkermatt/ol-popup/master/examples/popup.html)
+    *   Create a popup instance, show it on single-click specifying the content
+*   [DOM Events](http://raw.githack.com/walkermatt/ol-popup/master/examples/dom-events.html)
+    *   Handle DOM events triggered by interacting with elements within the popup content
+*   [Scroll](http://raw.githack.com/walkermatt/ol-popup/master/examples/scroll.html)
+    *   Controlling popup dimensions and scrolling overflowing content
+*   [Multiple popups](http://raw.githack.com/walkermatt/ol-popup/master/examples/multiple.html)
+    *   Add a new popup each time the maps is clicked
+*   [Bundling with `ol` package (Parcel, Webpack...)](https://github.com/walkermatt/ol-popup-examples)
+    *   To use the popup with the [`ol` package](https://www.npmjs.com/package/ol) and a module bundler such as Parcel, Webpack etc. see [ol-popup-examples](https://github.com/walkermatt/ol-popup-examples).
 
 The source for all examples can be found in [examples](examples).
 
@@ -66,10 +66,12 @@ To use the popup with the [`ol` package](https://www.npmjs.com/package/ol) and a
 
 #### Table of Contents
 
--   [Popup](#popup)
-    -   [show](#show)
-    -   [hide](#hide)
-    -   [isOpened](#isopened)
+*   [Popup](#popup)
+    *   [Parameters](#parameters)
+    *   [show](#show)
+        *   [Parameters](#parameters-1)
+    *   [hide](#hide)
+    *   [isOpened](#isopened)
 
 ### Popup
 
@@ -78,19 +80,19 @@ To use the popup with the [`ol` package](https://www.npmjs.com/package/ol) and a
 OpenLayers Popup Overlay.
 See [the examples](./examples) for usage. Styling can be done via CSS.
 
-**Parameters**
+#### Parameters
 
--   `opt_options` **olx.OverlayOptions** options as defined by ol.Overlay. Defaults to
+*   `opt_options` **olx.OverlayOptions** options as defined by ol.Overlay. Defaults to
     `{autoPan: true, autoPanAnimation: {duration: 250}}`
 
 #### show
 
 Show the popup.
 
-**Parameters**
+##### Parameters
 
--   `coord` **ol.Coordinate** Where to anchor the popup.
--   `html` **([String](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) \| [HTMLElement](https://developer.mozilla.org/docs/Web/HTML/Element))** String or element of HTML to display within the popup.
+*   `coord` **ol.Coordinate** Where to anchor the popup.
+*   `html` **([String](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | [HTMLElement](https://developer.mozilla.org/docs/Web/HTML/Element))** String or element of HTML to display within the popup.
 
 Returns **[Popup](#popup)** The Popup instance
 
