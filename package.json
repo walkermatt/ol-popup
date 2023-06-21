@@ -16,8 +16,10 @@
     "url": "https://github.com/walkermatt/ol-popup/issues"
   },
   "scripts": {
-    "build": "rollup --config rollup.config.js",
-    "doc": "documentation readme src/ol-popup.js --section=API"
+    "build": "rollup --config rollup.config.js && tsc --noEmit false --emitDeclarationOnly true",
+    "check": "tsc",
+    "doc": "documentation readme src/ol-popup.js --section=API",
+    "types": "tsc --noEmit false --emitDeclarationOnly true"
   },
   "peerDependencies": {
     "ol": ">=5.0.0"
@@ -26,6 +28,7 @@
     "rollup": "^0.41.4",
     "rollup-plugin-commonjs": "^7.0.0",
     "rollup-plugin-node-resolve": "^2.0.0",
-    "documentation": "^5.3.5"
+    "documentation": "^5.3.5",
+    "typescript": "^5.1.3"
   }
 }
