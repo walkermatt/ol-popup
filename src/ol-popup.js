@@ -9,7 +9,7 @@ export default class Popup extends Overlay {
 
 
     /**
-     * @param {ol_Overlay_Options} opt_options OpenLayers Overlay options,
+     * @param {ol_Overlay_Options} [opt_options] OpenLayers Overlay options,
      *                                         defaults to `{autoPan: {animation: {duration: 250}}}`
      */
     constructor(opt_options) {
