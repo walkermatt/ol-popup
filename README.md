@@ -83,7 +83,7 @@ See [the examples](./examples) for usage. Styling can be done via CSS.
 
 #### Parameters
 
-*   `opt_options` **ol\_Overlay\_Options** OpenLayers Overlay options,
+*   `opt_options` **ol\_Overlay\_Options?** OpenLayers Overlay options,
     defaults to `{autoPan: {animation: {duration: 250}}}`
 
 #### show

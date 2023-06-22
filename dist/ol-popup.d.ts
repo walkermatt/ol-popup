@@ -1,10 +1,7 @@
 /**
 * OpenLayers Popup Overlay.
 * See [the examples](./examples) for usage. Styling can be done via CSS.
-* @constructor
 * @extends {Overlay}
-* @param {import('ol/Overlay').Options} opt_options options as defined by ol.Overlay. Defaults to
-* `{animation: {duration: 250}}`
 */
 export default class Popup extends Overlay {
     /**
@@ -20,16 +17,21 @@ export default class Popup extends Overlay {
     * @param {HTMLElement} elm
     */
     private static enableTouchScroll_;
+    /**
+     * @param {ol_Overlay_Options} [opt_options] OpenLayers Overlay options,
+     *                                         defaults to `{autoPan: {animation: {duration: 250}}}`
+     */
+    constructor(opt_options?: import("ol/Overlay").Options | undefined);
     container: HTMLDivElement;
     closer: HTMLAnchorElement;
     content: HTMLDivElement;
     /**
     * Show the popup.
-    * @param {import('ol/coordinate').Coordinate} coord Where to anchor the popup.
+    * @param {ol_coordinate_Coordinate} coord Where to anchor the popup.
     * @param {String|HTMLElement} html String or element of HTML to display within the popup.
     * @returns {Popup} The Popup instance
     */
-    show(coord: import('ol/coordinate').Coordinate, html: string | HTMLElement): Popup;
+    show(coord: import("ol/coordinate").Coordinate, html: string | HTMLElement): Popup;
     /**
     * Hide the popup.
     * @returns {Popup} The Popup instance
@@ -41,4 +43,6 @@ export default class Popup extends Overlay {
     */
     isOpened(): boolean;
 }
+export type ol_Overlay_Options = import('ol/Overlay').Options;
+export type ol_coordinate_Coordinate = import('ol/coordinate').Coordinate;
 import Overlay from 'ol/Overlay';
