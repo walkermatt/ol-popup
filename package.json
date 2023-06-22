@@ -9,7 +9,8 @@
   },
   "author": "Matt Walker (http://longwayaround.org.uk)",
   "contributors": [
-    "Avi Kelman <patcherton.fixesthings@gmail.com>"
+    "Avi Kelman <patcherton.fixesthings@gmail.com>",
+    "Sascha Englert <hello@englerts.de>
   ],
   "license": "MIT",
   "bugs": {
@@ -28,7 +29,7 @@
     "rollup": "^0.41.4",
     "rollup-plugin-commonjs": "^7.0.0",
     "rollup-plugin-node-resolve": "^2.0.0",
-    "documentation": "^5.3.5",
-    "typescript": "^5.1.3"
+    "typescript": "^5.1.3",
+    "documentation": "^14.0.2"
   }
 }
