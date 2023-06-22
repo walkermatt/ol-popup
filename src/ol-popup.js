@@ -3,16 +3,14 @@ import Overlay from 'ol/Overlay';
 /**
 * OpenLayers Popup Overlay.
 * See [the examples](./examples) for usage. Styling can be done via CSS.
-* @constructor
 * @extends {Overlay}
-* @param {import('ol/Overlay').Options} opt_options options as defined by ol.Overlay. Defaults to
-* `{animation: {duration: 250}}`
 */
 export default class Popup extends Overlay {
 
 
     /**
-     * @param {import('ol/Overlay').Options} opt_options
+     * @param {ol_Overlay_Options} opt_options OpenLayers Overlay options,
+     *                                         defaults to `{autoPan: {animation: {duration: 250}}}`
      */
     constructor(opt_options) {
 
@@ -57,7 +55,7 @@ export default class Popup extends Overlay {
 
     /**
     * Show the popup.
-    * @param {import('ol/coordinate').Coordinate} coord Where to anchor the popup.
+    * @param {ol_coordinate_Coordinate} coord Where to anchor the popup.
     * @param {String|HTMLElement} html String or element of HTML to display within the popup.
     * @returns {Popup} The Popup instance
     */
@@ -132,3 +130,8 @@ export default class Popup extends Overlay {
 if (window.ol && window.ol.Overlay) {
     window.ol.Overlay.Popup = Popup;
 }
+
+/**
+ * @typedef {import('ol/Overlay').Options} ol_Overlay_Options
+ * @typedef {import('ol/coordinate').Coordinate} ol_coordinate_Coordinate
+ */
