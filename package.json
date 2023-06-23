@@ -9,15 +9,18 @@
   },
   "author": "Matt Walker (http://longwayaround.org.uk)",
   "contributors": [
-    "Avi Kelman <patcherton.fixesthings@gmail.com>"
+    "Avi Kelman <patcherton.fixesthings@gmail.com>",
+    "Sascha Englert <hello@englerts.de>"
   ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/walkermatt/ol-popup/issues"
   },
   "scripts": {
-    "build": "rollup --config rollup.config.js",
-    "doc": "documentation readme src/ol-popup.js --section=API"
+    "build": "rollup --config rollup.config.js && tsc --noEmit false --emitDeclarationOnly true",
+    "check": "tsc",
+    "doc": "documentation readme src/ol-popup.js --section=API",
+    "types": "tsc --noEmit false --emitDeclarationOnly true"
   },
   "peerDependencies": {
     "ol": ">=5.0.0"
@@ -26,6 +29,7 @@
     "rollup": "^0.41.4",
     "rollup-plugin-commonjs": "^7.0.0",
     "rollup-plugin-node-resolve": "^2.0.0",
-    "documentation": "^14.0.2"
+    "documentation": "^14.0.2",
+    "typescript": "^5.1.3"
   }
 }

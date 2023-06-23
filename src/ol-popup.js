@@ -3,25 +3,25 @@ import Overlay from 'ol/Overlay';
 /**
 * OpenLayers Popup Overlay.
 * See [the examples](./examples) for usage. Styling can be done via CSS.
-* @constructor
-* @extends {ol.Overlay}
-* @param {olx.OverlayOptions} opt_options options as defined by ol.Overlay. Defaults to
-* `{autoPan: true, autoPanAnimation: {duration: 250}}`
+* @extends {Overlay}
 */
 export default class Popup extends Overlay {
 
+
+    /**
+     * @param {ol_Overlay_Options} [opt_options] OpenLayers Overlay options,
+     *                                         defaults to `{autoPan: {animation: {duration: 250}}}`
+     */
     constructor(opt_options) {
 
         var options = opt_options || {};
 
         if (options.autoPan === undefined) {
-            options.autoPan = true;
-        }
-
-        if (options.autoPanAnimation === undefined) {
-            options.autoPanAnimation = {
-                duration: 250
-            };
+            options.autoPan = {
+                animation: {
+                    duration: 250
+                }
+            }
         }
 
         var element = document.createElement('div');
@@ -55,7 +55,7 @@ export default class Popup extends Overlay {
 
     /**
     * Show the popup.
-    * @param {ol.Coordinate} coord Where to anchor the popup.
+    * @param {ol_coordinate_Coordinate} coord Where to anchor the popup.
     * @param {String|HTMLElement} html String or element of HTML to display within the popup.
     * @returns {Popup} The Popup instance
     */
@@ -90,6 +90,7 @@ export default class Popup extends Overlay {
     * @private
     * @desc Apply workaround to enable scrolling of overflowing content within an
     * element. Adapted from https://gist.github.com/chrismbarr/4107472
+    * @param {HTMLElement} elm 
     */
     static enableTouchScroll_(elm) {
         if(Popup.isTouchDevice_()){
@@ -123,8 +124,14 @@ export default class Popup extends Overlay {
 
 }
 
+
 // Expose Popup as ol.Overlay.Popup if using a full build of
 // OpenLayers
 if (window.ol && window.ol.Overlay) {
     window.ol.Overlay.Popup = Popup;
 }
+
+/**
+ * @typedef {import('ol/Overlay').Options} ol_Overlay_Options
+ * @typedef {import('ol/coordinate').Coordinate} ol_coordinate_Coordinate
+ */

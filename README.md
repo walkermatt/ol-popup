@@ -72,18 +72,19 @@ To use the popup with the [`ol` package](https://www.npmjs.com/package/ol) and a
         *   [Parameters](#parameters-1)
     *   [hide](#hide)
     *   [isOpened](#isopened)
+*   [](#)
 
 ### Popup
 
-**Extends ol.Overlay**
+**Extends Overlay**
 
 OpenLayers Popup Overlay.
 See [the examples](./examples) for usage. Styling can be done via CSS.
 
 #### Parameters
 
-*   `opt_options` **olx.OverlayOptions** options as defined by ol.Overlay. Defaults to
-    `{autoPan: true, autoPanAnimation: {duration: 250}}`
+*   `opt_options` **ol\_Overlay\_Options?** OpenLayers Overlay options,
+    defaults to `{autoPan: {animation: {duration: 250}}}`
 
 #### show
 
@@ -91,7 +92,7 @@ Show the popup.
 
 ##### Parameters
 
-*   `coord` **ol.Coordinate** Where to anchor the popup.
+*   `coord` **ol\_coordinate\_Coordinate** Where to anchor the popup.
 *   `html` **([String](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | [HTMLElement](https://developer.mozilla.org/docs/Web/HTML/Element))** String or element of HTML to display within the popup.
 
 Returns **[Popup](#popup)** The Popup instance
@@ -107,6 +108,8 @@ Returns **[Popup](#popup)** The Popup instance
 Indicates if the popup is in open state
 
 Returns **[Boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** Whether the popup instance is open
+
+###
 
 ## Contributing
 
