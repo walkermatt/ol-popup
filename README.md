@@ -3,7 +3,7 @@
 Basic popup overlay for an ['ol'](https://github.com/openlayers/openlayers) map. By
 default the map is centred so that the popup is entirely visible.
 
-Compatible with OpenLayers version 5, 6 and 7 (see note in [Install - Parcel,
+Compatible with OpenLayers version 5, 6, 7, 8 and 9 (see note in [Install - Parcel,
 Webpack etc.](#parcel-webpack-etc) regarding installing the appropriate version
 of `ol-popup` for OpenLayers).
 
@@ -19,8 +19,8 @@ The examples demonstrate usage and can be viewed online thanks to [raw.githack.c
     *   Controlling popup dimensions and scrolling overflowing content
 *   [Multiple popups](http://raw.githack.com/walkermatt/ol-popup/master/examples/multiple.html)
     *   Add a new popup each time the maps is clicked
-*   [Bundling with `ol` package (Parcel, Webpack...)](https://github.com/walkermatt/ol-popup-examples)
-    *   To use the popup with the [`ol` package](https://www.npmjs.com/package/ol) and a module bundler such as Parcel, Webpack etc. see [ol-popup-examples](https://github.com/walkermatt/ol-popup-examples).
+*   [ESM build](https://codesandbox.io/p/sandbox/ol-popup-cyzdh2)
+    *   To use the popup with the [`ol` package](https://www.npmjs.com/package/ol) and a module bundler such as Vite, Parcel, Webpack etc. see [ol-popup sandbox](https://codesandbox.io/p/sandbox/ol-popup-cyzdh2).
 
 The source for all examples can be found in [examples](examples).
 
@@ -42,7 +42,7 @@ Load `ol-popup.js` after OpenLayers. The popup overlay is available as `Popup` o
 <link rel="stylesheet" href="https://unpkg.com/ol-popup@5.0.0/src/ol-popup.css" />
 ```
 
-### Parcel, Webpack etc.
+### ESM
 
 NPM package: [ol-popup](https://www.npmjs.com/package/ol-popup).
 
@@ -57,8 +57,6 @@ Install the package via `npm`
 #### CSS
 
 The CSS file `ol-popup.css` can be found in `./node_modules/ol-popup/src`
-
-To use the popup with the [`ol` package](https://www.npmjs.com/package/ol) and a module bundler such as Parcel, Webpack etc. see [ol-popup-examples](https://github.com/walkermatt/ol-popup-examples).
 
 ## API
 

@@ -17,7 +17,7 @@
     "url": "https://github.com/walkermatt/ol-popup/issues"
   },
   "scripts": {
-    "build": "rollup --config rollup.config.js && tsc --noEmit false --emitDeclarationOnly true",
+    "build": "rollup --config rollup.config.js && tsc --noEmit false --emitDeclarationOnly true && cp src/ol-popup.css dist",
     "check": "tsc",
     "doc": "documentation readme src/ol-popup.js --section=API",
     "types": "tsc --noEmit false --emitDeclarationOnly true"
