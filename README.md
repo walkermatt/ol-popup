@@ -33,13 +33,13 @@ The source for all examples can be found in [examples](examples).
 Load `ol-popup.js` after OpenLayers. The popup overlay is available as `Popup` or `ol.Overlay.Popup`.
 
 ```HTML
-<script src="https://unpkg.com/ol-popup@5.0.0"></script>
+<script src="https://unpkg.com/ol-popup@latest/dist/ol-popup.js"></script>
 ```
 
 #### CSS
 
 ```HTML
-<link rel="stylesheet" href="https://unpkg.com/ol-popup@5.0.0/src/ol-popup.css" />
+<link rel="stylesheet" href="https://unpkg.com/ol-popup@latest/dist/ol-popup.css" />
 ```
 
 ### ESM
