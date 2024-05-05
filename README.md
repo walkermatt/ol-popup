@@ -56,7 +56,7 @@ Install the package via `npm`
 
 #### CSS
 
-The CSS file `ol-popup.css` can be found in `./node_modules/ol-popup/src`
+The CSS file `ol-popup.css` can be found in `./node_modules/ol-popup/dist`
 
 ## API
 
